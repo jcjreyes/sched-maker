@@ -7,8 +7,16 @@ import { Section } from './types/enums';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import moment from 'moment';
+import { useState } from 'react';
+import { EventSourceInput } from '@fullcalendar/core/index.js';
+import interactionPlugin from '@fullcalendar/interaction';
 
 function App() {
+	const [innerPadding, setInnerPadding] = useState<string>('');
+	const [outerMargin, setOuterMargin] = useState<string>('');
+	const [eventFontSize, setEventFontSize] = useState<string>('');
+	const [textAlignment, setTextAlignment] = useState<string>('');
+
 	const studentSched: string = sampleData;
 	const subjectSet = new SetWithContentEquality<Subject>(
 		(subject) => subject.code,
@@ -31,12 +39,11 @@ function App() {
 	});
 
 	const calendarItems = [];
+
 	subjectSet.items.forEach((subject) => {
 		const sectionKey = subject.section as Section;
-		const cleanedSectionKey = sectionKey.replace('-', '');
-		console.log(subject, sectionSchedules[cleanedSectionKey]);
-
 		const combinedDetails = {
+      groupId: subject.code,
 			title: subject.code,
 			daysOfWeek: sectionSchedules[sectionKey].days,
 			startTime: moment(sectionSchedules[sectionKey].startTime, 'hh:mm A').format(
@@ -45,30 +52,94 @@ function App() {
 			endTime: moment(sectionSchedules[sectionKey].endTime, 'hh:mm A').format(
 				'HH:mm:ss',
 			),
+      color: '#378006',
 		};
 
 		calendarItems.push(combinedDetails);
 	});
+  console.log(calendarItems);
 
-	console.log(calendarItems);
+	const handleSliderChange =
+		(
+			property: string,
+			dynamicState: React.Dispatch<React.SetStateAction<string>>,
+		) =>
+		(event: React.ChangeEvent<HTMLInputElement>) => {
+			const root = document.documentElement.style;
+			const value = parseInt(event.target.value, 10);
+			const alignments = ['left', 'center', 'right'];
+
+			dynamicState(value);
+
+			if (property == 'event-text-alignment') {
+				root.setProperty(`--${property}`, alignments[parseInt(value)]);
+			} else {
+				root.setProperty(`--${property}`, `${value * 0.01}rem`);
+			}
+		};
 
 	return (
 		<>
-			<div className="actual-calendar">
+			<div className='actual-calendar'>
 				<FullCalendar
-					plugins={[timeGridPlugin]}
+					plugins={[timeGridPlugin, interactionPlugin]}
 					headerToolbar={false}
 					allDaySlot={false}
 					dayHeaderContent={(args) => moment(args.date).format('ddd')}
-					slotMinTime="07:30"
-					slotMaxTime="20:00"
-					slotDuration="00:20:00"
+					slotMinTime='07:30'
+					slotMaxTime='20:00'
+					slotDuration='00:20:00'
 					events={calendarItems}
 					hiddenDays={[0, 6]}
 					// height={"auto"}
 					contentHeight={'auto'}
 					// aspectRatio={0.7}
+					editable={true}
+          eventClick={(info) => {console.log(info)}}
 				/>
+			</div>
+			<div className='options'>
+				<div className='options-slider'>
+					Inner Padding
+					<input
+						type='range'
+						min='0'
+						max='100'
+						value={innerPadding}
+						onChange={handleSliderChange('inner-padding', setInnerPadding)}
+					/>
+				</div>
+				<div className='options-slider'>
+					Outer Margin
+					<input
+						type='range'
+						min='0'
+						max='100'
+						value={outerMargin}
+						onChange={handleSliderChange('outer-margin', setOuterMargin)}
+					/>
+				</div>
+				<div className='options-slider'>
+					Event Font Size
+					<input
+						type='range'
+						min='0'
+						max='200'
+						value={eventFontSize}
+						onChange={handleSliderChange('event-font-size', setEventFontSize)}
+					/>
+				</div>
+				<div className='options-slider'>
+					Text Alignment
+					<input
+						type='range'
+						min='0'
+						max='2'
+						step='1'
+						value={textAlignment}
+						onChange={handleSliderChange('event-text-alignment', setTextAlignment)}
+					/>
+				</div>
 			</div>
 		</>
 	);
