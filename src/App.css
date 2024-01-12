@@ -69,10 +69,21 @@ colgroup,
 	border-style: none !important;
 }
 
-.fc-timegrid-event-harness {
-	margin: 0.25rem 0.5rem;
-}
+/**/
+/* .fc-timegrid-col .fc-timegrid-col-frame { */
+/* 	margin: 0 0.5rem; */
+/* } */
 
 .fc-timegrid-event .fc-event-main {
-	padding: 0.2rem;
+	padding: var(--inner-padding);
+  font-size: var(--event-font-size);
+}
+
+.fc-timegrid-event-harness-inset {
+	margin: var(--outer-margin);
+  /* padding: var(--inner-padding); */
+}
+
+.fc-event-time, .fc-event-title {
+  text-align: var(--event-text-alignment);
 }

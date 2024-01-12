@@ -12,6 +12,12 @@
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+
+  --inner-padding: 0.2rem;
+  --outer-margin: 0.25rem;
+  --event-font-size: 1.25rem;
+  --event-text-alignment: center;
+  --calendar-width: 1280px;
 }
 
 /*a {
