@@ -156,6 +156,7 @@ export enum Section {
 	Z4 = 'Z4',
 	Z5 = 'Z5',
 	NWAM = 'N-WAM',
+  NSPM1 = 'N-SPM1',
 	GTH = 'GTH',
 	ST = 'ST',
 	ST1 = 'ST1',

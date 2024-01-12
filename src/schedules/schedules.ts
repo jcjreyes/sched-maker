@@ -96,6 +96,12 @@ const sectionNWAMSched: Schedule = {
 	endTime: '12:00 PM',
 };
 
+const sectionNSPM1Sched: Schedule = {
+  days: [Day.Sat],
+  startTime: '1:00 PM',
+  endTime: '5:00 PM'
+}
+
 // const generateSubsectionSchedules = (
 //   baseSchedule: Schedule,
 //   subsections: number,
@@ -197,6 +203,7 @@ const sectionSchedules: Record<Section, Schedule> = {
 	[Section.O4]: sectionOSched,
 	[Section.O5]: sectionOSched,
 	[Section.NWAM]: sectionNWAMSched,
+  [Section.NSPM1]: sectionNSPM1Sched
 	// ...generateSubsectionSchedules(sectionASched, 5),
 	// ...generateSubsectionSchedules(sectionBSched, 5),
 	// ...generateSubsectionSchedules(sectionCSched, 5),
