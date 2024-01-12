@@ -75,6 +75,6 @@ G CTC 307 (FULLY ONSITE)
 2000-2030	 	 	 	 	 	 
 2030-2100	 	 	 	 	 	 
 2100-2130
-`
+`;
 
 export default sampleData;
