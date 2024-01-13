@@ -20,15 +20,20 @@ import sectionSchedules from './schedules/schedules';
 import { EventSourceInput } from '@fullcalendar/core/index.js';
 
 function App() {
+  // Data
 	const [rawSched, setRawSched] = useState<string>('');
 	const [studentSched, setStudentSched] = useState<string>('');
+
+  // Cosmetics
 	const [innerPadding, setInnerPadding] = useState<string>('');
 	const [outerMargin, setOuterMargin] = useState<string>('');
 	const [eventFontSize, setEventFontSize] = useState<string>('');
 	const [textAlignment, setTextAlignment] = useState<string>('');
 	const [backgroundColor, setBackgroundColor] = useState<string>('#F9F8F4');
-	const [eventColor, setEventColor] = useState<string>('#F9F8F4');
 	const [showTimeLabels, setShowTimeLabels] = useState(true);
+
+  // Data Editing
+	const [eventColor, setEventColor] = useState<string>('#F9F8F4');
 	const [selectedEvent, setSelectedEvent] = useState<EventSourceInput>();
 	const [calendarItems, setCalendarItems] = useState<EventSourceInput[]>([]);
 
