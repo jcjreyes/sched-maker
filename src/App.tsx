@@ -73,6 +73,12 @@ function App() {
 		calendarItems.map((item) => moment(item.startTime, 'HH:mm:ss')),
 	);
 
+	const maxEndTime = moment.max(
+		calendarItems.map((item) => moment(item.endTime, 'HH:mm:ss')),
+	);
+
+	const adjustedMaxEndTime = maxEndTime.clone().add(1, 'hours');
+
 	const handleSliderChange =
 		(
 			property: string,
@@ -103,16 +109,10 @@ function App() {
 		root.setProperty('--background-color', value);
 	};
 
-	const maxEndTime = moment.max(
-		calendarItems.map((item) => moment(item.endTime, 'HH:mm:ss')),
-	);
-
-	const adjustedMaxEndTime = maxEndTime.clone().add(1, 'hours');
-
 	const handleDownload = () => {
 		const targetNode = document.querySelector('.actual-calendar');
 
-		targetNode.style.backgroundColor = '#242424';
+		targetNode.style.backgroundColor = backgroundColor;
 		html2canvas(targetNode).then((canvas) => {
 			const link = document.createElement('a');
 			link.href = canvas.toDataURL('image/png');
@@ -151,9 +151,7 @@ function App() {
 					slotDuration="00:20:00"
 					events={calendarItems}
 					hiddenDays={[0, 6]}
-					// height={"auto"}
 					contentHeight={'auto'}
-					// aspectRatio={0.7}
 					editable={true}
 					eventClick={(info) => {
 						console.log(info);
