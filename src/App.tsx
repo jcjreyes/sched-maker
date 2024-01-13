@@ -19,13 +19,13 @@ function App() {
 	const [eventFontSize, setEventFontSize] = useState<string>('');
 	const [textAlignment, setTextAlignment] = useState<string>('');
 	const [backgroundColor, setBackgroundColor] = useState<string>('#F9F8F4');
+	const [eventColor, setEventColor] = useState<string>('#F9F8F4');
 	const [showTimeLabels, setShowTimeLabels] = useState(true);
-  const [selectedEvent, setSelectedEvent] = useState<EventSourceInput>();
-  const [calendarItems, setCalendarItems] = useState<EventSourceInput[]>([]);
-  const subjectSet = useMemo(() => {
-    return new SetWithContentEquality<Subject>((subject) => subject.code);
-  }, []);
-
+	const [selectedEvent, setSelectedEvent] = useState<EventSourceInput>();
+	const [calendarItems, setCalendarItems] = useState<EventSourceInput[]>([]);
+	const subjectSet = useMemo(() => {
+		return new SetWithContentEquality<Subject>((subject) => subject.code);
+	}, []);
 
 	useEffect(() => {
 		document.documentElement.style.setProperty(
@@ -37,25 +37,29 @@ function App() {
 	const studentSched: string = sampleData;
 	const subjectArray = parseStudentSchedule(studentSched);
 
-  useEffect(() => {
-    subjectArray.forEach((subject) => {
-      const subjectDetails = subject.split('\n');
-      const subjectCode = subjectDetails[0];
-      const subjectSection = subjectDetails[1].split(' ')[0];
-      const subjectLoc = subjectDetails[1].split(' ')[1];
+	useEffect(() => {
+		subjectArray.forEach((subject) => {
+			const subjectDetails = subject.split('\n');
+			const subjectCode = subjectDetails[0];
+			const subjectSection = subjectDetails[1].split(' ')[0];
+			const subjectLoc = subjectDetails[1].split(' ')[1];
 
-      const final: Subject = {
-        code: subjectCode,
-        location: subjectLoc,
-        section: subjectSection,
-      };
+			const final: Subject = {
+				code: subjectCode,
+				location: subjectLoc,
+				section: subjectSection,
+			};
 
-      subjectSet.add(final);
-    });
+			subjectSet.add(final);
+		});
 
-    const calendarItems = convertSubjectSetToCalendarItems(subjectSet, sectionSchedules);
-    setCalendarItems(calendarItems)
-  }, []); 
+		const calendarItems = convertSubjectSetToCalendarItems(
+			subjectSet,
+			sectionSchedules,
+		);
+		setCalendarItems(calendarItems);
+	}, []);
+
 	const minStartTime = moment.min(
 		calendarItems.map((item) => moment(item.startTime, 'HH:mm:ss')),
 	);
@@ -96,6 +100,24 @@ function App() {
 		root.setProperty('--background-color', value);
 	};
 
+	const handleEventColorChange = (
+		event: React.ChangeEvent<HTMLInputElement>,
+	) => {
+		setEventColor(event.target.value);
+		setSelectedEvent({ ...selectedEvent, color: eventColor });
+		setCalendarItems((prevCalendarItems) => {
+			const updatedItemIndex = prevCalendarItems.findIndex(
+				(item) => item.title == selectedEvent?.title,
+			);
+			if (updatedItemIndex !== -1) {
+				const updatedCalendarItems = [...prevCalendarItems];
+				updatedCalendarItems[updatedItemIndex] = selectedEvent;
+				return updatedCalendarItems;
+			}
+			return prevCalendarItems;
+		});
+	};
+
 	const handleDownload = () => {
 		const targetNode = document.querySelector('.actual-calendar');
 
@@ -112,17 +134,17 @@ function App() {
 
 	return (
 		<>
-			<div className="header">
+			<div className='header'>
 				<h1>class schedule</h1>
 			</div>
-			<div className="actual-calendar">
+			<div className='actual-calendar'>
 				{showTimeLabels && (
-					<div className="time-labels">
+					<div className='time-labels'>
 						{Array.from({ length: 24 }).map((_, index) => {
 							const currentTime = minStartTime.clone().add(index, 'hours');
 							if (currentTime.isBefore(adjustedMaxEndTime)) {
 								return (
-									<div key={index} className="time-label">
+									<div key={index} className='time-label'>
 										{currentTime.format('HH:mm')}
 									</div>
 								);
@@ -136,78 +158,86 @@ function App() {
 					headerToolbar={false}
 					allDaySlot={false}
 					dayHeaderContent={(args) => moment(args.date).format('ddd').toLowerCase()}
-					slotMinTime="07:30"
-					slotMaxTime="20:00"
-					slotDuration="00:20:00"
+					slotMinTime='07:30'
+					slotMaxTime='20:00'
+					slotDuration='00:20:00'
 					events={calendarItems}
 					hiddenDays={[0, 6]}
 					contentHeight={'auto'}
 					editable={true}
 					eventClick={(info) => {
-						console.log(info);
+						const event = calendarItems.find(
+							(item) => item.title == info.event.title,
+						);
+						setSelectedEvent(event);
 					}}
 				/>
 			</div>
-			<div className="options">
-				<div className="options-download">
+			<div className='options'>
+				<div className='options-download'>
 					<button onClick={handleDownload}>Download as PNG</button>
 				</div>
-				<div className="options-toggle">
+				<div className='options-toggle'>
 					<label>Show Time Labels</label>
 					<input
-						type="checkbox"
+						type='checkbox'
 						checked={showTimeLabels}
 						onChange={() => setShowTimeLabels(!showTimeLabels)}
 					/>
 				</div>
-				<div className="options-slider">
+				<div className='options-slider'>
 					Inner Padding
 					<input
-						type="range"
-						min="0"
-						max="100"
+						type='range'
+						min='0'
+						max='100'
 						value={innerPadding}
 						onChange={handleSliderChange('inner-padding', setInnerPadding)}
 					/>
 				</div>
-				<div className="options-slider">
+				<div className='options-slider'>
 					Outer Margin
 					<input
-						type="range"
-						min="0"
-						max="100"
+						type='range'
+						min='0'
+						max='100'
 						value={outerMargin}
 						onChange={handleSliderChange('outer-margin', setOuterMargin)}
 					/>
 				</div>
-				<div className="options-slider">
+				<div className='options-slider'>
 					Event Font Size
 					<input
-						type="range"
-						min="0"
-						max="200"
+						type='range'
+						min='0'
+						max='200'
 						value={eventFontSize}
 						onChange={handleSliderChange('event-font-size', setEventFontSize)}
 					/>
 				</div>
-				<div className="options-slider">
+				<div className='options-slider'>
 					Text Alignment
 					<input
-						type="range"
-						min="0"
-						max="2"
-						step="1"
+						type='range'
+						min='0'
+						max='2'
+						step='1'
 						value={textAlignment}
 						onChange={handleSliderChange('event-text-alignment', setTextAlignment)}
 					/>
 				</div>
-				<div className="options-color">
+				<div className='options-color'>
 					Background Color
 					<input
-						type="color"
+						type='color'
 						value={backgroundColor}
 						onChange={handleBackgroundColorChange}
 					/>
+				</div>
+				{JSON.stringify(selectedEvent)}
+				<div className='options-color'>
+					Event Color
+					<input type='color' value={eventColor} onChange={handleEventColorChange} />
 				</div>
 			</div>
 		</>
