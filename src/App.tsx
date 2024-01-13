@@ -3,14 +3,15 @@ import sampleData from './util/sampleData';
 import { parseStudentSchedule } from './util/parseStudentSched';
 import SetWithContentEquality, { Subject } from './types/SubjectSet';
 import sectionSchedules from './schedules/schedules';
-import { Section } from './types/enums';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import moment from 'moment';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { EventSourceInput } from '@fullcalendar/core/index.js';
 import interactionPlugin from '@fullcalendar/interaction';
 import html2canvas from 'html2canvas';
+import { convertSubjectSetToCalendarItems } from './util/subjectSetToCalendarItem';
+import { parseSubjectEntry } from './util/parseSubjectEntry';
 
 function App() {
 	const [innerPadding, setInnerPadding] = useState<string>('');
@@ -19,6 +20,12 @@ function App() {
 	const [textAlignment, setTextAlignment] = useState<string>('');
 	const [backgroundColor, setBackgroundColor] = useState<string>('#242424');
 	const [showTimeLabels, setShowTimeLabels] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState<EventSourceInput>();
+  const [calendarItems, setCalendarItems] = useState<EventSourceInput[]>([]);
+  const subjectSet = useMemo(() => {
+    return new SetWithContentEquality<Subject>((subject) => subject.code);
+  }, []);
+
 
 	useEffect(() => {
 		document.documentElement.style.setProperty(
@@ -28,46 +35,27 @@ function App() {
 	}, [backgroundColor]);
 
 	const studentSched: string = sampleData;
-	const subjectSet = new SetWithContentEquality<Subject>(
-		(subject) => subject.code,
-	);
 	const subjectArray = parseStudentSchedule(studentSched);
 
-	subjectArray.forEach((subject) => {
-		const subjectDetails = subject.split('\n');
-		const subjectCode = subjectDetails[0];
-		const subjectSection = subjectDetails[1].split(' ')[0];
-		const subjectLoc = subjectDetails[1].split(' ')[1];
+  useEffect(() => {
+    subjectArray.forEach((subject) => {
+      const subjectDetails = subject.split('\n');
+      const subjectCode = subjectDetails[0];
+      const subjectSection = subjectDetails[1].split(' ')[0];
+      const subjectLoc = subjectDetails[1].split(' ')[1];
 
-		const final: Subject = {
-			code: subjectCode,
-			location: subjectLoc,
-			section: subjectSection,
-		};
+      const final: Subject = {
+        code: subjectCode,
+        location: subjectLoc,
+        section: subjectSection,
+      };
 
-		subjectSet.add(final);
-	});
+      subjectSet.add(final);
+    });
 
-	const calendarItems = [];
-
-	subjectSet.items.forEach((subject) => {
-		const sectionKey = subject.section as Section;
-		const combinedDetails = {
-			groupId: subject.code,
-			title: subject.code,
-			daysOfWeek: sectionSchedules[sectionKey].days,
-			startTime: moment(sectionSchedules[sectionKey].startTime, 'hh:mm A').format(
-				'HH:mm:ss',
-			),
-			endTime: moment(sectionSchedules[sectionKey].endTime, 'hh:mm A').format(
-				'HH:mm:ss',
-			),
-			color: '#378006',
-		};
-
-		calendarItems.push(combinedDetails);
-	});
-	console.log(calendarItems);
+    const calendarItems = convertSubjectSetToCalendarItems(subjectSet, sectionSchedules);
+    setCalendarItems(calendarItems)
+  }, []); 
 
 	const minStartTime = moment.min(
 		calendarItems.map((item) => moment(item.startTime, 'HH:mm:ss')),
