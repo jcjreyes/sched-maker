@@ -20,6 +20,8 @@ import sectionSchedules from './schedules/schedules';
 import { EventSourceInput } from '@fullcalendar/core/index.js';
 
 function App() {
+  const [rawSched, setRawSched] = useState<string>('');
+  const [studentSched, setStudentSched] = useState<string>('');
 	const [innerPadding, setInnerPadding] = useState<string>('');
 	const [outerMargin, setOuterMargin] = useState<string>('');
 	const [eventFontSize, setEventFontSize] = useState<string>('');
@@ -40,10 +42,8 @@ function App() {
 		);
 	}, [backgroundColor]);
 
-	const studentSched: string = sampleData;
-	const subjectArray = parseStudentSchedule(studentSched);
-
 	useEffect(() => {
+    const subjectArray = parseStudentSchedule(studentSched);
 		subjectArray.forEach((subject) => {
 			const subjectDetails = subject.split('\n');
 			const subjectCode = subjectDetails[0];
@@ -64,7 +64,7 @@ function App() {
 			sectionSchedules,
 		);
 		setCalendarItems(calendarItems);
-	}, []);
+	}, [studentSched]);
 
 	const minStartTime = moment.min(
 		calendarItems.map((item) => moment(item.startTime, 'HH:mm:ss')),
@@ -246,6 +246,8 @@ function App() {
 					<input type='color' value={eventColor} onChange={handleEventColorChange} />
 				</div>
 			</div>
+      <textarea value={rawSched} onInput={e => setRawSched(e.target.value)}/>
+      <button onClick={() => setStudentSched(rawSched)}>Generate</button>
 		</>
 	);
 }
