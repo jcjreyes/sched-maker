@@ -7,7 +7,7 @@ import { Section } from './types/enums';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import moment from 'moment';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { EventSourceInput } from '@fullcalendar/core/index.js';
 import interactionPlugin from '@fullcalendar/interaction';
 import html2canvas from 'html2canvas';
@@ -17,7 +17,15 @@ function App() {
 	const [outerMargin, setOuterMargin] = useState<string>('');
 	const [eventFontSize, setEventFontSize] = useState<string>('');
 	const [textAlignment, setTextAlignment] = useState<string>('');
+	const [backgroundColor, setBackgroundColor] = useState<string>('#242424');
 	const [showTimeLabels, setShowTimeLabels] = useState(true);
+
+	useEffect(() => {
+		document.documentElement.style.setProperty(
+			'background-color',
+			backgroundColor,
+		);
+	}, [backgroundColor]);
 
 	const studentSched: string = sampleData;
 	const subjectSet = new SetWithContentEquality<Subject>(
@@ -84,6 +92,17 @@ function App() {
 			}
 		};
 
+	const handleBackgroundColorChange = (
+		event: React.ChangeEvent<HTMLInputElement>,
+	) => {
+		const root = document.documentElement.style;
+		const value = event.target.value.startsWith('#')
+			? event.target.value
+			: `#${event.target.value}`;
+		setBackgroundColor(value);
+		root.setProperty('--background-color', value);
+	};
+
 	const maxEndTime = moment.max(
 		calendarItems.map((item) => moment(item.endTime, 'HH:mm:ss')),
 	);
@@ -100,7 +119,6 @@ function App() {
 			link.download = 'calendar.png';
 			link.click();
 
-			// Reset the background color after capturing
 			targetNode.style.backgroundColor = 'transparent';
 		});
 	};
@@ -193,6 +211,14 @@ function App() {
 						step="1"
 						value={textAlignment}
 						onChange={handleSliderChange('event-text-alignment', setTextAlignment)}
+					/>
+				</div>
+				<div className="options-color">
+					Background Color
+					<input
+						type="color"
+						value={backgroundColor}
+						onChange={handleBackgroundColorChange}
 					/>
 				</div>
 			</div>
