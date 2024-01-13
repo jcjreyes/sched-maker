@@ -17,7 +17,7 @@ function App() {
 	const [outerMargin, setOuterMargin] = useState<string>('');
 	const [eventFontSize, setEventFontSize] = useState<string>('');
 	const [textAlignment, setTextAlignment] = useState<string>('');
-	const [backgroundColor, setBackgroundColor] = useState<string>('#242424');
+	const [backgroundColor, setBackgroundColor] = useState<string>('#F9F8F4');
 	const [showTimeLabels, setShowTimeLabels] = useState(true);
 
 	useEffect(() => {
@@ -62,7 +62,7 @@ function App() {
 			endTime: moment(sectionSchedules[sectionKey].endTime, 'hh:mm A').format(
 				'HH:mm:ss',
 			),
-			color: '#378006',
+			color: '#DAF1FF',
 		};
 
 		calendarItems.push(combinedDetails);
@@ -125,6 +125,9 @@ function App() {
 
 	return (
 		<>
+			<div className="header">
+				<h1>class schedule</h1>
+			</div>
 			<div className="actual-calendar">
 				{showTimeLabels && (
 					<div className="time-labels">
@@ -145,7 +148,7 @@ function App() {
 					plugins={[timeGridPlugin, interactionPlugin]}
 					headerToolbar={false}
 					allDaySlot={false}
-					dayHeaderContent={(args) => moment(args.date).format('ddd')}
+					dayHeaderContent={(args) => moment(args.date).format('ddd').toLowerCase()}
 					slotMinTime="07:30"
 					slotMaxTime="20:00"
 					slotDuration="00:20:00"

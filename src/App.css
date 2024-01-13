@@ -76,14 +76,16 @@ colgroup,
 
 .fc-timegrid-event .fc-event-main {
 	padding: var(--inner-padding);
-  font-size: var(--event-font-size);
+	font-size: var(--event-font-size);
+	color: #1a1a19;
 }
 
 .fc-timegrid-event-harness-inset {
 	margin: var(--outer-margin);
-  /* padding: var(--inner-padding); */
+	/* padding: var(--inner-padding); */
 }
 
-.fc-event-time, .fc-event-title {
-  text-align: var(--event-text-alignment);
+.fc-event-time,
+.fc-event-title {
+	text-align: var(--event-text-alignment);
 }

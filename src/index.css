@@ -4,7 +4,7 @@
 	font-weight: 400;
 
 	color-scheme: light dark;
-	color: rgba(255, 255, 255, 0.87);
+	color: #1a1a19;
 	box-sizing: border-box;
 
 	font-synthesis: none;
@@ -16,6 +16,15 @@
 	--event-font-size: 1.25rem;
 	--event-text-alignment: center;
 	--calendar-width: 1280px;
+}
+
+.header h1 {
+	font-weight: bold;
+	background-color: #f5f05b;
+	width: fit-content;
+	padding: 3px;
+	border-radius: 5px;
+	text-transform: lowercase;
 }
 
 .actual-calendar {
@@ -41,7 +50,7 @@
 	content: '';
 	position: absolute;
 	left: 0;
-	width: 95vw;
+	width: 98vw;
 	height: 1px;
 	background-color: #ccc;
 	top: 0;
@@ -51,6 +60,18 @@
 	top: 0;
 }
 
+@media only screen and (max-width: 695px) {
+	#root {
+		--event-font-size: 10px;
+		padding: 0 !important;
+	}
+	.actual-calendar {
+		gap: 0;
+	}
+	.time-labels {
+		font-size: small;
+	}
+}
 /*a {
   font-weight: 500;
   color: #646cff;
