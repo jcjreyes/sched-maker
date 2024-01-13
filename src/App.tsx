@@ -10,6 +10,7 @@ import moment from 'moment';
 import { useState } from 'react';
 import { EventSourceInput } from '@fullcalendar/core/index.js';
 import interactionPlugin from '@fullcalendar/interaction';
+import html2canvas from 'html2canvas';
 
 function App() {
 	const [innerPadding, setInnerPadding] = useState<string>('');
@@ -89,6 +90,21 @@ function App() {
 
 	const adjustedMaxEndTime = maxEndTime.clone().add(1, 'hours');
 
+	const handleDownload = () => {
+		const targetNode = document.querySelector('.actual-calendar');
+
+		targetNode.style.backgroundColor = '#242424';
+		html2canvas(targetNode).then((canvas) => {
+			const link = document.createElement('a');
+			link.href = canvas.toDataURL('image/png');
+			link.download = 'calendar.png';
+			link.click();
+
+			// Reset the background color after capturing
+			targetNode.style.backgroundColor = 'transparent';
+		});
+	};
+
 	return (
 		<>
 			<div className="actual-calendar">
@@ -127,6 +143,9 @@ function App() {
 				/>
 			</div>
 			<div className="options">
+				<div className="options-download">
+					<button onClick={handleDownload}>Download as PNG</button>
+				</div>
 				<div className="options-toggle">
 					<label>Show Time Labels</label>
 					<input
