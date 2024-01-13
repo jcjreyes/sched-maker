@@ -60,6 +60,65 @@
 	top: 0;
 }
 
+.download-container {
+	display: flex;
+	justify-content: center;
+}
+.options-download {
+	background-color: #f5f05b;
+	width: fit-content;
+	border: none;
+	padding: 12px 30px;
+	cursor: pointer;
+	font-size: 20px;
+	border-radius: 12px;
+}
+
+.options-download:hover {
+	background-color: #f3ec32;
+}
+
+.options-toggle {
+	display: flex;
+	align-items: center;
+}
+
+.options-toggle label {
+	margin-right: 10px;
+}
+
+.options-toggle input[type='checkbox'] {
+	appearance: none;
+	width: 50px;
+	height: 26px;
+	border-radius: 13px;
+	background-color: #ccc;
+	outline: none;
+	position: relative;
+	cursor: pointer;
+	transition: background-color 0.3s;
+}
+
+.options-toggle input[type='checkbox']:before {
+	content: '';
+	position: absolute;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	background-color: #f8f8fc;
+	left: 2px;
+	top: 1px;
+	transition: transform 0.3s;
+}
+
+.options-toggle input[type='checkbox']:checked {
+	background-color: #f5f05b;
+}
+
+.options-toggle input[type='checkbox']:checked:before {
+	transform: translateX(24px);
+}
+
 @media only screen and (max-width: 695px) {
 	#root {
 		--event-font-size: 10px;

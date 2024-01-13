@@ -8,9 +8,9 @@ import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import moment from 'moment';
 import { useState, useEffect } from 'react';
-import { EventSourceInput } from '@fullcalendar/core/index.js';
 import interactionPlugin from '@fullcalendar/interaction';
 import html2canvas from 'html2canvas';
+import '@fortawesome/fontawesome-free/css/all.css';
 
 function App() {
 	const [innerPadding, setInnerPadding] = useState<string>('');
@@ -19,6 +19,9 @@ function App() {
 	const [textAlignment, setTextAlignment] = useState<string>('');
 	const [backgroundColor, setBackgroundColor] = useState<string>('#F9F8F4');
 	const [showTimeLabels, setShowTimeLabels] = useState(true);
+	const [toggleState, setToggleState] = useState(0);
+	const [isSmallScreen, setIsSmallScreen] = useState(false);
+	const [showMore, setShowMore] = useState(false);
 
 	useEffect(() => {
 		document.documentElement.style.setProperty(
@@ -122,6 +125,112 @@ function App() {
 			targetNode.style.backgroundColor = 'transparent';
 		});
 	};
+	const options = [
+		'Time Labels',
+		'Inner Padding',
+		'Outer Margin',
+		'Event Font Size',
+		'Text Alignment',
+		'Background Color',
+	];
+
+	const optionsButtons = [];
+	const fields = [];
+	const toggleTab = (index) => {
+		setToggleState(index);
+	};
+
+	const fieldMappings = {
+		'Time Labels': (
+			<div className="options-toggle">
+				<label>Show Time Labels</label>
+				<input
+					type="checkbox"
+					checked={showTimeLabels}
+					onChange={() => setShowTimeLabels(!showTimeLabels)}
+				/>
+			</div>
+		),
+		'Inner Padding': (
+			<div className="options-slider">
+				Inner Padding
+				<input
+					type="range"
+					min="0"
+					max="100"
+					value={innerPadding}
+					onChange={handleSliderChange('inner-padding', setInnerPadding)}
+				/>
+			</div>
+		),
+		'Outer Margin': (
+			<div className="options-slider">
+				Outer Margin
+				<input
+					type="range"
+					min="0"
+					max="100"
+					value={outerMargin}
+					onChange={handleSliderChange('outer-margin', setOuterMargin)}
+				/>
+			</div>
+		),
+		'Event Font Size': (
+			<div className="options-slider">
+				Event Font Size
+				<input
+					type="range"
+					min="0"
+					max="200"
+					value={eventFontSize}
+					onChange={handleSliderChange('event-font-size', setEventFontSize)}
+				/>
+			</div>
+		),
+		'Text Alignment': (
+			<div className="options-slider">
+				Text Alignment
+				<input
+					type="range"
+					min="0"
+					max="2"
+					step="1"
+					value={textAlignment}
+					onChange={handleSliderChange('event-text-alignment', setTextAlignment)}
+				/>
+			</div>
+		),
+		'Background Color': (
+			<div className="options-color">
+				Background Color
+				<input
+					type="color"
+					value={backgroundColor}
+					onChange={handleBackgroundColorChange}
+				/>
+			</div>
+		),
+	};
+
+	options.forEach((key, i) => {
+		const isActive = toggleState === i;
+		const isHidden = isSmallScreen && !showMore && !isActive;
+		const isHiddenClass = isHidden ? 'hidetab' : '';
+
+		optionsButtons.push(
+			<button
+				key={key}
+				className={`tabs ${isActive ? 'active-tabs' : ''} ${isHiddenClass}`}
+				onClick={() => toggleTab(i)}
+			>
+				{key}
+			</button>,
+		);
+
+		if (isActive) {
+			fields.push(fieldMappings[key]);
+		}
+	});
 
 	return (
 		<>
@@ -161,67 +270,16 @@ function App() {
 					}}
 				/>
 			</div>
-			<div className="options">
+			<div className="download-container">
 				<div className="options-download">
-					<button onClick={handleDownload}>Download as PNG</button>
+					<div onClick={handleDownload}>
+						<i className="fas fa-download"></i> Download
+					</div>
 				</div>
-				<div className="options-toggle">
-					<label>Show Time Labels</label>
-					<input
-						type="checkbox"
-						checked={showTimeLabels}
-						onChange={() => setShowTimeLabels(!showTimeLabels)}
-					/>
-				</div>
-				<div className="options-slider">
-					Inner Padding
-					<input
-						type="range"
-						min="0"
-						max="100"
-						value={innerPadding}
-						onChange={handleSliderChange('inner-padding', setInnerPadding)}
-					/>
-				</div>
-				<div className="options-slider">
-					Outer Margin
-					<input
-						type="range"
-						min="0"
-						max="100"
-						value={outerMargin}
-						onChange={handleSliderChange('outer-margin', setOuterMargin)}
-					/>
-				</div>
-				<div className="options-slider">
-					Event Font Size
-					<input
-						type="range"
-						min="0"
-						max="200"
-						value={eventFontSize}
-						onChange={handleSliderChange('event-font-size', setEventFontSize)}
-					/>
-				</div>
-				<div className="options-slider">
-					Text Alignment
-					<input
-						type="range"
-						min="0"
-						max="2"
-						step="1"
-						value={textAlignment}
-						onChange={handleSliderChange('event-text-alignment', setTextAlignment)}
-					/>
-				</div>
-				<div className="options-color">
-					Background Color
-					<input
-						type="color"
-						value={backgroundColor}
-						onChange={handleBackgroundColorChange}
-					/>
-				</div>
+			</div>
+			<div className="options">
+				{isSmallScreen && !showMore ? null : optionsButtons}
+				{fields}
 			</div>
 		</>
 	);
