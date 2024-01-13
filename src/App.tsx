@@ -20,8 +20,8 @@ import sectionSchedules from './schedules/schedules';
 import { EventSourceInput } from '@fullcalendar/core/index.js';
 
 function App() {
-  const [rawSched, setRawSched] = useState<string>('');
-  const [studentSched, setStudentSched] = useState<string>('');
+	const [rawSched, setRawSched] = useState<string>('');
+	const [studentSched, setStudentSched] = useState<string>('');
 	const [innerPadding, setInnerPadding] = useState<string>('');
 	const [outerMargin, setOuterMargin] = useState<string>('');
 	const [eventFontSize, setEventFontSize] = useState<string>('');
@@ -31,9 +31,6 @@ function App() {
 	const [showTimeLabels, setShowTimeLabels] = useState(true);
 	const [selectedEvent, setSelectedEvent] = useState<EventSourceInput>();
 	const [calendarItems, setCalendarItems] = useState<EventSourceInput[]>([]);
-	const subjectSet = useMemo(() => {
-		return new SetWithContentEquality<Subject>((subject) => subject.code);
-	}, []);
 
 	useEffect(() => {
 		document.documentElement.style.setProperty(
@@ -43,7 +40,11 @@ function App() {
 	}, [backgroundColor]);
 
 	useEffect(() => {
-    const subjectArray = parseStudentSchedule(studentSched);
+		const subjectArray = parseStudentSchedule(studentSched);
+		const subjectSet = new SetWithContentEquality<Subject>(
+			(subject) => subject.code,
+		);
+
 		subjectArray.forEach((subject) => {
 			const subjectDetails = subject.split('\n');
 			const subjectCode = subjectDetails[0];
@@ -246,8 +247,8 @@ function App() {
 					<input type='color' value={eventColor} onChange={handleEventColorChange} />
 				</div>
 			</div>
-      <textarea value={rawSched} onInput={e => setRawSched(e.target.value)}/>
-      <button onClick={() => setStudentSched(rawSched)}>Generate</button>
+			<textarea value={rawSched} onInput={(e) => setRawSched(e.target.value)} />
+			<button onClick={() => setStudentSched(rawSched)}>Generate</button>
 		</>
 	);
 }
