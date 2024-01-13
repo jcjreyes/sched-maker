@@ -13,43 +13,43 @@
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 
-  --inner-padding: 0.2rem;
-  --outer-margin: 0.25rem;
-  --event-font-size: 1.25rem;
-  --event-text-alignment: center;
-  --calendar-width: 1280px;
+	--inner-padding: 0.2rem;
+	--outer-margin: 0.25rem;
+	--event-font-size: 1.25rem;
+	--event-text-alignment: center;
+	--calendar-width: 1280px;
 }
 
 .actual-calendar {
-  display: flex;
+	display: flex;
 }
 
 .time-labels {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  margin-top: 68px;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	margin-top: 68px;
 }
 
 .time-label {
-  position: relative;
-  display: flex;
-  height: 60px;
-  align-items: center;
+	position: relative;
+	display: flex;
+	height: 70px;
+	align-items: center;
 }
 
 .time-label::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  width: 100vw; /* Use viewport width to ensure 100% of the screen width */
-  height: 1px;
-  background-color: #ccc;
-  top: 0;
+	content: '';
+	position: absolute;
+	left: 0;
+	width: 95vw;
+	height: 1px;
+	background-color: #ccc;
+	top: 0;
 }
 
 .time-label::before {
-  top: 0;
+	top: 0;
 }
 
 /*a {

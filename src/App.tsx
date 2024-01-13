@@ -16,6 +16,7 @@ function App() {
 	const [outerMargin, setOuterMargin] = useState<string>('');
 	const [eventFontSize, setEventFontSize] = useState<string>('');
 	const [textAlignment, setTextAlignment] = useState<string>('');
+	const [showTimeLabels, setShowTimeLabels] = useState(true);
 
 	const studentSched: string = sampleData;
 	const subjectSet = new SetWithContentEquality<Subject>(
@@ -43,7 +44,7 @@ function App() {
 	subjectSet.items.forEach((subject) => {
 		const sectionKey = subject.section as Section;
 		const combinedDetails = {
-      groupId: subject.code,
+			groupId: subject.code,
 			title: subject.code,
 			daysOfWeek: sectionSchedules[sectionKey].days,
 			startTime: moment(sectionSchedules[sectionKey].startTime, 'hh:mm A').format(
@@ -52,17 +53,16 @@ function App() {
 			endTime: moment(sectionSchedules[sectionKey].endTime, 'hh:mm A').format(
 				'HH:mm:ss',
 			),
-      color: '#378006',
+			color: '#378006',
 		};
 
 		calendarItems.push(combinedDetails);
 	});
-  console.log(calendarItems);
+	console.log(calendarItems);
 
-  // Find the minimum start time among all events
-  const minStartTime = moment.min(
-    calendarItems.map((item) => moment(item.startTime, "HH:mm:ss"))
-  );
+	const minStartTime = moment.min(
+		calendarItems.map((item) => moment(item.startTime, 'HH:mm:ss')),
+	);
 
 	const handleSliderChange =
 		(
@@ -83,64 +83,95 @@ function App() {
 			}
 		};
 
+	const maxEndTime = moment.max(
+		calendarItems.map((item) => moment(item.endTime, 'HH:mm:ss')),
+	);
+
+	const adjustedMaxEndTime = maxEndTime.clone().add(1, 'hours');
+
 	return (
 		<>
-			<div className='actual-calendar'>
+			<div className="actual-calendar">
+				{showTimeLabels && (
+					<div className="time-labels">
+						{Array.from({ length: 24 }).map((_, index) => {
+							const currentTime = minStartTime.clone().add(index, 'hours');
+							if (currentTime.isBefore(adjustedMaxEndTime)) {
+								return (
+									<div key={index} className="time-label">
+										{currentTime.format('HH:mm')}
+									</div>
+								);
+							}
+							return null;
+						})}
+					</div>
+				)}
 				<FullCalendar
 					plugins={[timeGridPlugin, interactionPlugin]}
 					headerToolbar={false}
 					allDaySlot={false}
 					dayHeaderContent={(args) => moment(args.date).format('ddd')}
-					slotMinTime='07:30'
-					slotMaxTime='20:00'
-					slotDuration='00:20:00'
+					slotMinTime="07:30"
+					slotMaxTime="20:00"
+					slotDuration="00:20:00"
 					events={calendarItems}
 					hiddenDays={[0, 6]}
 					// height={"auto"}
 					contentHeight={'auto'}
 					// aspectRatio={0.7}
 					editable={true}
-          eventClick={(info) => {console.log(info)}}
+					eventClick={(info) => {
+						console.log(info);
+					}}
 				/>
 			</div>
-			<div className='options'>
-				<div className='options-slider'>
+			<div className="options">
+				<div className="options-toggle">
+					<label>Show Time Labels</label>
+					<input
+						type="checkbox"
+						checked={showTimeLabels}
+						onChange={() => setShowTimeLabels(!showTimeLabels)}
+					/>
+				</div>
+				<div className="options-slider">
 					Inner Padding
 					<input
-						type='range'
-						min='0'
-						max='100'
+						type="range"
+						min="0"
+						max="100"
 						value={innerPadding}
 						onChange={handleSliderChange('inner-padding', setInnerPadding)}
 					/>
 				</div>
-				<div className='options-slider'>
+				<div className="options-slider">
 					Outer Margin
 					<input
-						type='range'
-						min='0'
-						max='100'
+						type="range"
+						min="0"
+						max="100"
 						value={outerMargin}
 						onChange={handleSliderChange('outer-margin', setOuterMargin)}
 					/>
 				</div>
-				<div className='options-slider'>
+				<div className="options-slider">
 					Event Font Size
 					<input
-						type='range'
-						min='0'
-						max='200'
+						type="range"
+						min="0"
+						max="200"
 						value={eventFontSize}
 						onChange={handleSliderChange('event-font-size', setEventFontSize)}
 					/>
 				</div>
-				<div className='options-slider'>
+				<div className="options-slider">
 					Text Alignment
 					<input
-						type='range'
-						min='0'
-						max='2'
-						step='1'
+						type="range"
+						min="0"
+						max="2"
+						step="1"
 						value={textAlignment}
 						onChange={handleSliderChange('event-text-alignment', setTextAlignment)}
 					/>
