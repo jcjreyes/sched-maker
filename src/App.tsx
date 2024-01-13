@@ -1,17 +1,23 @@
-import './App.css';
-import sampleData from './util/sampleData';
-import { parseStudentSchedule } from './util/parseStudentSched';
-import SetWithContentEquality, { Subject } from './types/SubjectSet';
-import sectionSchedules from './schedules/schedules';
+import React, { useState, useEffect, useMemo } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
-import moment from 'moment';
-import { useState, useEffect, useMemo } from 'react';
-import { EventSourceInput } from '@fullcalendar/core/index.js';
 import interactionPlugin from '@fullcalendar/interaction';
 import html2canvas from 'html2canvas';
+import moment from 'moment';
+
+// Import styles
+import './App.css';
+
+// Import data and utility functions
+import sampleData from './util/sampleData';
+import { parseStudentSchedule } from './util/parseStudentSched';
 import { convertSubjectSetToCalendarItems } from './util/subjectSetToCalendarItem';
 import { parseSubjectEntry } from './util/parseSubjectEntry';
+
+// Import types and schedules
+import SetWithContentEquality, { Subject } from './types/SubjectSet';
+import sectionSchedules from './schedules/schedules';
+import { EventSourceInput } from '@fullcalendar/core/index.js';
 
 function App() {
 	const [innerPadding, setInnerPadding] = useState<string>('');
