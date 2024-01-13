@@ -1,27 +1,41 @@
-import './App.css';
-import sampleData from './util/sampleData';
-import { parseStudentSchedule } from './util/parseStudentSched';
-import SetWithContentEquality, { Subject } from './types/SubjectSet';
-import sectionSchedules from './schedules/schedules';
-import { Section } from './types/enums';
+import React, { useState, useEffect, useMemo } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
-import moment from 'moment';
-import { useState, useEffect } from 'react';
 import interactionPlugin from '@fullcalendar/interaction';
 import html2canvas from 'html2canvas';
+import moment from 'moment';
+
+// Import styles
+import './App.css';
+
+// Import data and utility functions
+import sampleData from './util/sampleData';
+import { parseStudentSchedule } from './util/parseStudentSched';
+import { convertSubjectSetToCalendarItems } from './util/subjectSetToCalendarItem';
+import { parseSubjectEntry } from './util/parseSubjectEntry';
+
+// Import types and schedules
+import SetWithContentEquality, { Subject } from './types/SubjectSet';
+import sectionSchedules from './schedules/schedules';
 import '@fortawesome/fontawesome-free/css/all.css';
 
 function App() {
+	// Data
+	const [rawSched, setRawSched] = useState<string>('');
+	const [studentSched, setStudentSched] = useState<string>('');
+
+	// Cosmetics
 	const [innerPadding, setInnerPadding] = useState<string>('');
 	const [outerMargin, setOuterMargin] = useState<string>('');
 	const [eventFontSize, setEventFontSize] = useState<string>('');
 	const [textAlignment, setTextAlignment] = useState<string>('');
 	const [backgroundColor, setBackgroundColor] = useState<string>('#F9F8F4');
 	const [showTimeLabels, setShowTimeLabels] = useState(true);
-	const [toggleState, setToggleState] = useState(0);
-	const [isSmallScreen, setIsSmallScreen] = useState(false);
-	const [showMore, setShowMore] = useState(false);
+
+	// Data Editing
+	const [eventColor, setEventColor] = useState<string>('#F9F8F4');
+	const [selectedEvent, setSelectedEvent] = useState<EventSourceInput>();
+	const [calendarItems, setCalendarItems] = useState<EventSourceInput[]>([]);
 
 	useEffect(() => {
 		document.documentElement.style.setProperty(
@@ -30,47 +44,33 @@ function App() {
 		);
 	}, [backgroundColor]);
 
-	const studentSched: string = sampleData;
-	const subjectSet = new SetWithContentEquality<Subject>(
-		(subject) => subject.code,
-	);
-	const subjectArray = parseStudentSchedule(studentSched);
+	useEffect(() => {
+		const subjectArray = parseStudentSchedule(studentSched);
+		const subjectSet = new SetWithContentEquality<Subject>(
+			(subject) => subject.code,
+		);
 
-	subjectArray.forEach((subject) => {
-		const subjectDetails = subject.split('\n');
-		const subjectCode = subjectDetails[0];
-		const subjectSection = subjectDetails[1].split(' ')[0];
-		const subjectLoc = subjectDetails[1].split(' ')[1];
+		subjectArray.forEach((subject) => {
+			const subjectDetails = subject.split('\n');
+			const subjectCode = subjectDetails[0];
+			const subjectSection = subjectDetails[1].split(' ')[0];
+			const subjectLoc = subjectDetails[1].split(' ')[1];
 
-		const final: Subject = {
-			code: subjectCode,
-			location: subjectLoc,
-			section: subjectSection,
-		};
+			const final: Subject = {
+				code: subjectCode,
+				location: subjectLoc,
+				section: subjectSection,
+			};
 
-		subjectSet.add(final);
-	});
+			subjectSet.add(final);
+		});
 
-	const calendarItems = [];
-
-	subjectSet.items.forEach((subject) => {
-		const sectionKey = subject.section as Section;
-		const combinedDetails = {
-			groupId: subject.code,
-			title: subject.code,
-			daysOfWeek: sectionSchedules[sectionKey].days,
-			startTime: moment(sectionSchedules[sectionKey].startTime, 'hh:mm A').format(
-				'HH:mm:ss',
-			),
-			endTime: moment(sectionSchedules[sectionKey].endTime, 'hh:mm A').format(
-				'HH:mm:ss',
-			),
-			color: '#DAF1FF',
-		};
-
-		calendarItems.push(combinedDetails);
-	});
-	console.log(calendarItems);
+		const calendarItems = convertSubjectSetToCalendarItems(
+			subjectSet,
+			sectionSchedules,
+		);
+		setCalendarItems(calendarItems);
+	}, [studentSched]);
 
 	const minStartTime = moment.min(
 		calendarItems.map((item) => moment(item.startTime, 'HH:mm:ss')),
@@ -110,6 +110,24 @@ function App() {
 			: `#${event.target.value}`;
 		setBackgroundColor(value);
 		root.setProperty('--background-color', value);
+	};
+
+	const handleEventColorChange = (
+		event: React.ChangeEvent<HTMLInputElement>,
+	) => {
+		setEventColor(event.target.value);
+		setSelectedEvent({ ...selectedEvent, color: eventColor });
+		setCalendarItems((prevCalendarItems) => {
+			const updatedItemIndex = prevCalendarItems.findIndex(
+				(item) => item.title == selectedEvent?.title,
+			);
+			if (updatedItemIndex !== -1) {
+				const updatedCalendarItems = [...prevCalendarItems];
+				updatedCalendarItems[updatedItemIndex] = selectedEvent;
+				return updatedCalendarItems;
+			}
+			return prevCalendarItems;
+		});
 	};
 
 	const handleDownload = () => {
@@ -266,7 +284,10 @@ function App() {
 					contentHeight={'auto'}
 					editable={true}
 					eventClick={(info) => {
-						console.log(info);
+						const event = calendarItems.find(
+							(item) => item.title == info.event.title,
+						);
+						setSelectedEvent(event);
 					}}
 				/>
 			</div>
@@ -276,7 +297,14 @@ function App() {
 						<i className="fas fa-download"></i> Download
 					</div>
 				</div>
+				{JSON.stringify(selectedEvent)}
+				<div className="options-color">
+					Event Color
+					<input type="color" value={eventColor} onChange={handleEventColorChange} />
+				</div>
 			</div>
+			<textarea value={rawSched} onInput={(e) => setRawSched(e.target.value)} />
+			<button onClick={() => setStudentSched(rawSched)}>Generate</button>
 			<div className="options">
 				{isSmallScreen && !showMore ? null : optionsButtons}
 				{fields}
