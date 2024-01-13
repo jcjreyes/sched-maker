@@ -18,7 +18,7 @@ function App() {
 	const [outerMargin, setOuterMargin] = useState<string>('');
 	const [eventFontSize, setEventFontSize] = useState<string>('');
 	const [textAlignment, setTextAlignment] = useState<string>('');
-	const [backgroundColor, setBackgroundColor] = useState<string>('#242424');
+	const [backgroundColor, setBackgroundColor] = useState<string>('#F9F8F4');
 	const [showTimeLabels, setShowTimeLabels] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<EventSourceInput>();
   const [calendarItems, setCalendarItems] = useState<EventSourceInput[]>([]);
@@ -56,7 +56,6 @@ function App() {
     const calendarItems = convertSubjectSetToCalendarItems(subjectSet, sectionSchedules);
     setCalendarItems(calendarItems)
   }, []); 
-
 	const minStartTime = moment.min(
 		calendarItems.map((item) => moment(item.startTime, 'HH:mm:ss')),
 	);
@@ -113,6 +112,9 @@ function App() {
 
 	return (
 		<>
+			<div className="header">
+				<h1>class schedule</h1>
+			</div>
 			<div className="actual-calendar">
 				{showTimeLabels && (
 					<div className="time-labels">
@@ -133,7 +135,7 @@ function App() {
 					plugins={[timeGridPlugin, interactionPlugin]}
 					headerToolbar={false}
 					allDaySlot={false}
-					dayHeaderContent={(args) => moment(args.date).format('ddd')}
+					dayHeaderContent={(args) => moment(args.date).format('ddd').toLowerCase()}
 					slotMinTime="07:30"
 					slotMaxTime="20:00"
 					slotDuration="00:20:00"
