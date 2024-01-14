@@ -89,3 +89,7 @@ colgroup,
 .fc-event-title {
 	text-align: var(--event-text-alignment);
 }
+
+.fc-timegrid-event-harness-inset .fc-timegrid-event {
+  box-shadow: none !important;
+}
