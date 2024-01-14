@@ -1,6 +1,6 @@
 #root {
-	max-width: 1280px;
-	height: 100vh;
+	/* max-width: 1280px; */
+	/* height: 100vh; */
 	margin: auto;
 	padding: 2rem;
 	text-align: center;
@@ -48,6 +48,11 @@
 
 .actual-calendar {
 	margin: auto;
+}
+
+.calendar-container {
+  height: 100vh;
+  width: 100vw;
 }
 
 .fc-day-today {

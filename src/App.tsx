@@ -261,6 +261,7 @@ function App() {
 					backgroundImage: `url(https://images.unsplash.com/photo-1704911206175-666dc9d9c4cc)`,
 				}}
         ref={exportRef}
+        className='container'
 			>
 				<div className='actual-calendar'>
 					{showTimeLabels && (
