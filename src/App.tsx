@@ -187,15 +187,10 @@ function App() {
 	};
 
 	const options = [
-		'Time Labels',
-		'Inner Padding',
-		'Outer Margin',
-		'Event Font Size',
-		'Text Alignment',
-		'Class Cell Opacity',
-		'Offset',
-		'Zoom',
-		'Background Color',
+		'Event Details',
+		'Event Appearance',
+		'Background',
+		'Calendar',
 	];
 
 	const optionsButtons = [];
@@ -205,7 +200,66 @@ function App() {
 	};
 
 	const fieldMappings = {
-		'Time Labels': (
+		'Event Appearance': (
+			<>
+				<div className="options-color">
+					Event Color
+					<input type="color" value={eventColor} onChange={handleEventColorChange} />
+				</div>
+				<div className="options-slider">
+					Inner Padding
+					<input
+						type="range"
+						min="0"
+						max="100"
+						value={innerPadding}
+						onChange={handleSliderChange('inner-padding', setInnerPadding)}
+					/>
+				</div>
+				<div className="options-slider">
+					Outer Margin
+					<input
+						type="range"
+						min="0"
+						max="100"
+						value={outerMargin}
+						onChange={handleSliderChange('outer-margin', setOuterMargin)}
+					/>
+				</div>
+				<div className="options-slider">
+					Event Font Size
+					<input
+						type="range"
+						min="0"
+						max="200"
+						value={eventFontSize}
+						onChange={handleSliderChange('event-font-size', setEventFontSize)}
+					/>
+				</div>
+				<div className="options-slider">
+					Text Alignment
+					<input
+						type="range"
+						min="0"
+						max="2"
+						step="1"
+						value={textAlignment}
+						onChange={handleSliderChange('event-text-alignment', setTextAlignment)}
+					/>
+				</div>
+				<div className="options-slider">
+					Class Cell Opacity
+					<input
+						type="range"
+						min="50"
+						max="100"
+						value={opacity}
+						onChange={handleSliderChange('event-opacity', setOpacity)}
+					/>
+				</div>
+			</>
+		),
+		Calendar: (
 			<div className="options-toggle">
 				<label>Show Time Labels</label>
 				<input
@@ -215,68 +269,7 @@ function App() {
 				/>
 			</div>
 		),
-		'Inner Padding': (
-			<div className="options-slider">
-				Inner Padding
-				<input
-					type="range"
-					min="0"
-					max="100"
-					value={innerPadding}
-					onChange={handleSliderChange('inner-padding', setInnerPadding)}
-				/>
-			</div>
-		),
-		'Outer Margin': (
-			<div className="options-slider">
-				Outer Margin
-				<input
-					type="range"
-					min="0"
-					max="100"
-					value={outerMargin}
-					onChange={handleSliderChange('outer-margin', setOuterMargin)}
-				/>
-			</div>
-		),
-		'Event Font Size': (
-			<div className="options-slider">
-				Event Font Size
-				<input
-					type="range"
-					min="0"
-					max="200"
-					value={eventFontSize}
-					onChange={handleSliderChange('event-font-size', setEventFontSize)}
-				/>
-			</div>
-		),
-		'Text Alignment': (
-			<div className="options-slider">
-				Text Alignment
-				<input
-					type="range"
-					min="0"
-					max="2"
-					step="1"
-					value={textAlignment}
-					onChange={handleSliderChange('event-text-alignment', setTextAlignment)}
-				/>
-			</div>
-		),
-		'Class Cell Opacity': (
-			<div className="options-slider">
-				Class Cell Opacity
-				<input
-					type="range"
-					min="50"
-					max="100"
-					value={opacity}
-					onChange={handleSliderChange('event-opacity', setOpacity)}
-				/>
-			</div>
-		),
-		Offset: (
+		Background: (
 			<>
 				<div className="options-slider">
 					<label>Horizontal Offset:</label>
@@ -298,29 +291,25 @@ function App() {
 						onChange={handleVerticalChange}
 					/>
 				</div>
+				<div className="options-slider">
+					<label>Zoom:</label>
+					<input
+						type="range"
+						min="50" // set your desired min zoom level
+						max="500" // set your desired max zoom level
+						value={zoomLevel}
+						onChange={handleZoomChange}
+					/>{' '}
+				</div>
+				<div className="options-color">
+					Background Color
+					<input
+						type="color"
+						value={backgroundColor}
+						onChange={handleBackgroundColorChange}
+					/>
+				</div>
 			</>
-		),
-		Zoom: (
-			<div className="options-slider">
-				<label>Zoom:</label>
-				<input
-					type="range"
-					min="50" // set your desired min zoom level
-					max="500" // set your desired max zoom level
-					value={zoomLevel}
-					onChange={handleZoomChange}
-				/>{' '}
-			</div>
-		),
-		'Background Color': (
-			<div className="options-color">
-				Background Color
-				<input
-					type="color"
-					value={backgroundColor}
-					onChange={handleBackgroundColorChange}
-				/>
-			</div>
 		),
 	};
 
@@ -373,10 +362,6 @@ function App() {
 					<div onClick={onButtonClick}>
 						<i className="fas fa-download"></i> Download
 					</div>
-				</div>
-				<div className="options-color">
-					Event Color
-					<input type="color" value={eventColor} onChange={handleEventColorChange} />
 				</div>
 			</div>
 			<div className="options-container">
