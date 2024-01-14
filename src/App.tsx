@@ -36,6 +36,9 @@ function App() {
 	const [textAlignment, setTextAlignment] = useState<string>('');
 	const [backgroundColor, setBackgroundColor] = useState<string>('#F9F8F4');
 	const [showTimeLabels, setShowTimeLabels] = useState(true);
+	const [horizontalOffset, setHorizontalOffset] = useState<number>(0);
+	const [verticalOffset, setVerticalOffset] = useState<number>(0);
+	const [zoomLevel, setZoomLevel] = useState<number>(100); // 100% initial zoom
 
 	// Data Editing
 	const [eventColor, setEventColor] = useState<string>('#F9F8F4');
@@ -47,6 +50,18 @@ function App() {
 	const [isSmallScreen, setIsSmallScreen] = useState(false);
 	const [showMore, setShowMore] = useState(false);
 	const exportRef = useRef<HTMLDivElement>(null);
+
+	const handleHorizontalChange = (event) => {
+		setHorizontalOffset(event.target.value);
+	};
+
+	const handleVerticalChange = (event) => {
+		setVerticalOffset(event.target.value);
+	};
+
+	const handleZoomChange = (event) => {
+		setZoomLevel(event.target.value);
+	};
 
 	const onButtonClick = useCallback(() => {
 		if (exportRef.current === null) {
@@ -161,20 +176,6 @@ function App() {
 		});
 	};
 
-	const handleDownload = () => {
-		const targetNode = document.querySelector('.actual-calendar');
-
-		targetNode.style.backgroundColor = backgroundColor;
-		html2canvas(targetNode).then((canvas) => {
-			const link = document.createElement('a');
-			link.href = canvas.toDataURL('image/png');
-			link.download = 'calendar.png';
-			link.click();
-
-			targetNode.style.backgroundColor = 'transparent';
-		});
-	};
-
 	const handleSaveTextArea = (inputText: string) => {
 		setRawSched(inputText);
 		setStudentSched(inputText);
@@ -187,6 +188,10 @@ function App() {
 		'Outer Margin',
 		'Event Font Size',
 		'Text Alignment',
+		'Class Cell Opacity',
+		'Horizontal Offset',
+		'Vertical Offset',
+		'Zoom',
 		'Background Color',
 	];
 
@@ -256,6 +261,54 @@ function App() {
 				/>
 			</div>
 		),
+		'Class Cell Opacity': (
+			<div className="options-slider">
+				Class Cell Opacity
+				<input
+					type="range"
+					min="50"
+					max="100"
+					value={opacity}
+					onChange={handleSliderChange('event-opacity', setOpacity)}
+				/>
+			</div>
+		),
+		'Horizontal Offset': (
+			<div className="options-slider">
+				<label>Horizontal Offset:</label>
+				<input
+					type="range"
+					min="0"
+					max="100"
+					value={horizontalOffset}
+					onChange={handleHorizontalChange}
+				/>
+			</div>
+		),
+		'Vertical Offset': (
+			<div className="options-slider">
+				<label>Vertical Offset:</label>
+				<input
+					type="range"
+					min="0"
+					max="100"
+					value={verticalOffset}
+					onChange={handleVerticalChange}
+				/>
+			</div>
+		),
+		Zoom: (
+			<div className="options-slider">
+				<label>Zoom:</label>
+				<input
+					type="range"
+					min="50" // set your desired min zoom level
+					max="500" // set your desired max zoom level
+					value={zoomLevel}
+					onChange={handleZoomChange}
+				/>{' '}
+			</div>
+		),
 		'Background Color': (
 			<div className="options-color">
 				Background Color
@@ -288,22 +341,6 @@ function App() {
 		}
 	});
 
-	const [horizontalOffset, setHorizontalOffset] = useState<number>(0);
-	const [verticalOffset, setVerticalOffset] = useState<number>(0);
-	const [zoomLevel, setZoomLevel] = useState<number>(100); // 100% initial zoom
-
-	const handleHorizontalChange = (event) => {
-		setHorizontalOffset(event.target.value);
-	};
-
-	const handleVerticalChange = (event) => {
-		setVerticalOffset(event.target.value);
-	};
-
-	const handleZoomChange = (event) => {
-		setZoomLevel(event.target.value);
-	};
-
 	return (
 		<>
 			<div className="header">
@@ -319,69 +356,77 @@ function App() {
 					onSave={handleSaveTextArea}
 				/>
 			)}
-			{calendarItems && calendarItems.length > 0 && (
-				<>
-					<div className="actual-calendar">
-						{showTimeLabels && (
-							<div className="time-labels">
-								{Array.from({ length: 24 }).map((_, index) => {
-									const currentTime = minStartTime.clone().add(index, 'hours');
-									if (currentTime.isBefore(adjustedMaxEndTime)) {
-										return (
-											<div key={index} className="time-label">
-												{currentTime.format('HH:mm')}
-											</div>
-										);
-									}
-									return null;
-								})}
-							</div>
-						)}
 
-						<FullCalendar
-							plugins={[timeGridPlugin, interactionPlugin]}
-							headerToolbar={false}
-							allDaySlot={false}
-							dayHeaderContent={(args) =>
-								moment(args.date).format('ddd').toLowerCase()
-							}
-							slotMinTime="07:30"
-							slotMaxTime="20:00"
-							slotDuration="00:20:00"
-							events={calendarItems}
-							hiddenDays={[0, 6]}
-							contentHeight={'auto'}
-							editable={true}
-							eventClick={(info) => {
-								const event = calendarItems.find(
-									(item) => item.title == info.event.title,
-								);
-								setSelectedEvent(event);
-							}}
-						/>
+			<div className="download-container">
+				<div className="options-download">
+					<div onClick={onButtonClick}>
+						<i className="fas fa-download"></i> Download
 					</div>
-					<div className="download-container">
-						<div className="options-download">
-							<div onClick={handleDownload}>
-								<i className="fas fa-download"></i> Download
-							</div>
-						</div>
-						{JSON.stringify(selectedEvent)}
-						<div className="options-color">
-							Event Color
-							<input
-								type="color"
-								value={eventColor}
-								onChange={handleEventColorChange}
+				</div>
+				<div className="options-color">
+					Event Color
+					<input type="color" value={eventColor} onChange={handleEventColorChange} />
+				</div>
+			</div>
+			<div className="options">
+				{isSmallScreen && !showMore ? null : optionsButtons}
+				{fields}
+			</div>
+			<div
+				className="background"
+				style={{
+					backgroundImage: `url(https://images.unsplash.com/photo-1704911206175-666dc9d9c4cc)`,
+					backgroundPosition: `${horizontalOffset}% ${verticalOffset}%`,
+					backgroundSize: `${zoomLevel}%`,
+					backgroundRepeat: 'no-repeat',
+				}}
+				ref={exportRef}
+				className="container"
+			>
+				{calendarItems && calendarItems.length > 0 && (
+					<>
+						<div className="actual-calendar">
+							{showTimeLabels && (
+								<div className="time-labels">
+									{Array.from({ length: 24 }).map((_, index) => {
+										const currentTime = minStartTime.clone().add(index, 'hours');
+										if (currentTime.isBefore(adjustedMaxEndTime)) {
+											return (
+												<div key={index} className="time-label">
+													{currentTime.format('HH:mm')}
+												</div>
+											);
+										}
+										return null;
+									})}
+								</div>
+							)}
+
+							<FullCalendar
+								plugins={[timeGridPlugin, interactionPlugin]}
+								headerToolbar={false}
+								allDaySlot={false}
+								dayHeaderContent={(args) =>
+									moment(args.date).format('ddd').toLowerCase()
+								}
+								slotMinTime="07:30"
+								slotMaxTime="20:00"
+								slotDuration="00:20:00"
+								events={calendarItems}
+								hiddenDays={[0, 6]}
+								contentHeight={'auto'}
+								editable={true}
+								eventClick={(info) => {
+									const event = calendarItems.find(
+										(item) => item.title == info.event.title,
+									);
+									setSelectedEvent(event);
+								}}
 							/>
 						</div>
-					</div>
-					<div className="options">
-						{isSmallScreen && !showMore ? null : optionsButtons}
-						{fields}
-					</div>
-				</>
-			)}
+					</>
+				)}
+			</div>
 		</>
 	);
 }
