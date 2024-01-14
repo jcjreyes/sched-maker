@@ -15,7 +15,7 @@
 	--inner-padding: 0.2rem;
 	--event-font-size: 1.25rem;
 	--event-text-alignment: center;
-  --event-opacity: 1;
+	--event-opacity: 1;
 	--calendar-width: 1280px;
 }
 
@@ -26,6 +26,38 @@
 	padding: 3px;
 	border-radius: 5px;
 	text-transform: lowercase;
+}
+
+.buttons {
+	display: flex;
+	gap: 1rem;
+}
+
+.options-container {
+	background-color: white;
+	padding: 12px;
+	border-radius: 5px;
+}
+.options-titles {
+	display: flex;
+	gap: 2px;
+	border-bottom: 1px solid #ccc;
+	color: #ccc;
+}
+
+.tabs {
+	flex: 1;
+}
+
+.tabs:hover {
+	cursor: pointer;
+	color: #f5f05b;
+	border-bottom: 2px solid #f5f05b;
+}
+
+.active-tabs {
+	color: #f5f05b;
+	border-bottom: 2px solid #f5f05b;
 }
 
 .actual-calendar {
@@ -65,14 +97,16 @@
 	display: flex;
 	justify-content: center;
 }
-.options-download {
+
+.btn-primary {
 	background-color: #f5f05b;
 	width: fit-content;
 	border: none;
 	padding: 12px 30px;
 	cursor: pointer;
 	font-size: 20px;
-	border-radius: 12px;
+	border-radius: 2px;
+	text-transform: uppercase;
 }
 
 .options-download:hover {

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import html2canvas from 'html2canvas';
 import moment from 'moment';
 
 // Import styles
@@ -22,7 +21,6 @@ import TextAreaModal from './components/TextAreaModal';
 import { toPng } from 'html-to-image';
 
 function App() {
-	// Data
 	// Data
 	const [rawSched, setRawSched] = useState<string>('');
 	const [studentSched, setStudentSched] = useState<string>('');
@@ -126,6 +124,12 @@ function App() {
 		setShowTextArea((prev) => !prev);
 	};
 
+	const clearSchedule = () => {
+		setStudentSched('');
+		setCalendarItems([]);
+		setSelectedEvent(null);
+	};
+
 	const handleSliderChange =
 		(
 			property: string,
@@ -189,8 +193,7 @@ function App() {
 		'Event Font Size',
 		'Text Alignment',
 		'Class Cell Opacity',
-		'Horizontal Offset',
-		'Vertical Offset',
+		'Offset',
 		'Zoom',
 		'Background Color',
 	];
@@ -273,29 +276,29 @@ function App() {
 				/>
 			</div>
 		),
-		'Horizontal Offset': (
-			<div className="options-slider">
-				<label>Horizontal Offset:</label>
-				<input
-					type="range"
-					min="0"
-					max="100"
-					value={horizontalOffset}
-					onChange={handleHorizontalChange}
-				/>
-			</div>
-		),
-		'Vertical Offset': (
-			<div className="options-slider">
-				<label>Vertical Offset:</label>
-				<input
-					type="range"
-					min="0"
-					max="100"
-					value={verticalOffset}
-					onChange={handleVerticalChange}
-				/>
-			</div>
+		Offset: (
+			<>
+				<div className="options-slider">
+					<label>Horizontal Offset:</label>
+					<input
+						type="range"
+						min="0"
+						max="100"
+						value={horizontalOffset}
+						onChange={handleHorizontalChange}
+					/>
+				</div>
+				<div className="options-slider">
+					<label>Vertical Offset:</label>
+					<input
+						type="range"
+						min="0"
+						max="100"
+						value={verticalOffset}
+						onChange={handleVerticalChange}
+					/>
+				</div>
+			</>
 		),
 		Zoom: (
 			<div className="options-slider">
@@ -327,13 +330,13 @@ function App() {
 		const isHiddenClass = isHidden ? 'hidetab' : '';
 
 		optionsButtons.push(
-			<button
+			<div
 				key={key}
 				className={`tabs ${isActive ? 'active-tabs' : ''} ${isHiddenClass}`}
 				onClick={() => toggleTab(i)}
 			>
 				{key}
-			</button>,
+			</div>,
 		);
 
 		if (isActive) {
@@ -344,21 +347,29 @@ function App() {
 	return (
 		<>
 			<div className="header">
-				<h1>class schedule</h1>
+				<h1>Class Schedule</h1>
 			</div>
-			<button onClick={toggleTextAreaVisibility}>
-				{showTextArea ? 'Hide Textarea' : 'Show Textarea'}
-			</button>
-			{showTextArea && (
-				<TextAreaModal
-					isOpen={showTextArea}
-					onClose={toggleTextAreaVisibility}
-					onSave={handleSaveTextArea}
-				/>
-			)}
-
+			<div className="buttons">
+				<div className="btn-primary">
+					<div onClick={toggleTextAreaVisibility}>
+						<i className="fa-solid fa-calendar-days"></i> Schedule
+					</div>
+				</div>
+				{showTextArea && (
+					<TextAreaModal
+						isOpen={showTextArea}
+						onClose={toggleTextAreaVisibility}
+						onSave={handleSaveTextArea}
+					/>
+				)}
+				<div className="btn-primary">
+					<div onClick={clearSchedule}>
+						<i className="fa-solid fa-rotate-right"></i> Clear
+					</div>
+				</div>
+			</div>
 			<div className="download-container">
-				<div className="options-download">
+				<div className="btn-primary">
 					<div onClick={onButtonClick}>
 						<i className="fas fa-download"></i> Download
 					</div>
@@ -368,8 +379,13 @@ function App() {
 					<input type="color" value={eventColor} onChange={handleEventColorChange} />
 				</div>
 			</div>
-			<div className="options">
-				{isSmallScreen && !showMore ? null : optionsButtons}
+			<div className="options-container">
+				<div className="options-header">
+					<h1>Settings</h1>
+					<div className="options-titles">
+						{isSmallScreen && !showMore ? null : optionsButtons}
+					</div>
+				</div>
 				{fields}
 			</div>
 			<div
