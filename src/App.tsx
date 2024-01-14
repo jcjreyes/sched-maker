@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -18,14 +18,15 @@ import { parseSubjectEntry } from './util/parseSubjectEntry';
 import SetWithContentEquality, { Subject } from './types/SubjectSet';
 import sectionSchedules from './schedules/schedules';
 import { EventSourceInput } from '@fullcalendar/core/index.js';
+import { toPng } from 'html-to-image';
 
 function App() {
-  // Data
+	// Data
 	const [rawSched, setRawSched] = useState<string>('');
 	const [studentSched, setStudentSched] = useState<string>('');
 
-  // Cosmetics
-  const [opacity, setOpacity] = useState<number>(100);
+	// Cosmetics
+	const [opacity, setOpacity] = useState<number>(100);
 	const [innerPadding, setInnerPadding] = useState<string>('');
 	const [outerMargin, setOuterMargin] = useState<string>('');
 	const [eventFontSize, setEventFontSize] = useState<string>('');
@@ -33,10 +34,28 @@ function App() {
 	const [backgroundColor, setBackgroundColor] = useState<string>('#F9F8F4');
 	const [showTimeLabels, setShowTimeLabels] = useState(true);
 
-  // Data Editing
+	// Data Editing
 	const [eventColor, setEventColor] = useState<string>('#F9F8F4');
 	const [selectedEvent, setSelectedEvent] = useState<EventSourceInput>();
 	const [calendarItems, setCalendarItems] = useState<EventSourceInput[]>([]);
+  const exportRef = useRef<HTMLDivElement>(null)
+
+  const onButtonClick = useCallback(() => {
+    if (exportRef.current === null) {
+      return
+    }
+
+    toPng(exportRef.current, { cacheBust: true, })
+      .then((dataUrl) => {
+        const link = document.createElement('a')
+        link.download = 'my-image-name.png'
+        link.href = dataUrl
+        link.click()
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }, [exportRef])
 
 	useEffect(() => {
 		document.documentElement.style.setProperty(
@@ -98,8 +117,8 @@ function App() {
 			if (property == 'event-text-alignment') {
 				root.setProperty(`--${property}`, alignments[parseInt(value)]);
 			} else if (property == 'event-opacity') {
-        root.setProperty(`--${property}`, value * 0.01)
-      } else {
+				root.setProperty(`--${property}`, value * 0.01);
+			} else {
 				root.setProperty(`--${property}`, `${value * 0.01}rem`);
 			}
 		};
@@ -152,121 +171,134 @@ function App() {
 			<div className='header'>
 				<h1>class schedule</h1>
 			</div>
-			<div className='actual-calendar'>
-				{showTimeLabels && (
-					<div className='time-labels'>
-						{Array.from({ length: 24 }).map((_, index) => {
-							const currentTime = minStartTime.clone().add(index, 'hours');
-							if (currentTime.isBefore(adjustedMaxEndTime)) {
-								return (
-									<div key={index} className='time-label'>
-										{currentTime.format('HH:mm')}
-									</div>
-								);
-							}
-							return null;
-						})}
+				<div className='options'>
+					<div className='options-download'>
+						<button onClick={handleDownload}>Download as PNG</button>
 					</div>
-				)}
-				<FullCalendar
-					plugins={[timeGridPlugin, interactionPlugin]}
-					headerToolbar={false}
-					allDaySlot={false}
-					dayHeaderContent={(args) => moment(args.date).format('ddd').toLowerCase()}
-					slotMinTime='07:30'
-					slotMaxTime='20:00'
-					slotDuration='00:20:00'
-					events={calendarItems}
-					hiddenDays={[0, 6]}
-					contentHeight={'auto'}
-					editable={true}
-					eventClick={(info) => {
-						const event = calendarItems.find(
-							(item) => item.title == info.event.title,
-						);
-						setSelectedEvent(event);
-					}}
-				/>
+					<div className='options-toggle'>
+						<label>Show Time Labels</label>
+						<input
+							type='checkbox'
+							checked={showTimeLabels}
+							onChange={() => setShowTimeLabels(!showTimeLabels)}
+						/>
+					</div>
+					<div className='options-slider'>
+						Inner Padding
+						<input
+							type='range'
+							min='0'
+							max='100'
+							value={innerPadding}
+							onChange={handleSliderChange('inner-padding', setInnerPadding)}
+						/>
+					</div>
+					<div className='options-slider'>
+						Outer Margin
+						<input
+							type='range'
+							min='0'
+							max='100'
+							value={outerMargin}
+							onChange={handleSliderChange('outer-margin', setOuterMargin)}
+						/>
+					</div>
+					<div className='options-slider'>
+						Event Font Size
+						<input
+							type='range'
+							min='0'
+							max='200'
+							value={eventFontSize}
+							onChange={handleSliderChange('event-font-size', setEventFontSize)}
+						/>
+					</div>
+					<div className='options-slider'>
+						Text Alignment
+						<input
+							type='range'
+							min='0'
+							max='2'
+							step='1'
+							value={textAlignment}
+							onChange={handleSliderChange('event-text-alignment', setTextAlignment)}
+						/>
+					</div>
+					<div className='options-slider'>
+						Class Cell Opacity
+						<input
+							type='range'
+							min='50'
+							max='100'
+							value={opacity}
+							onChange={handleSliderChange('event-opacity', setOpacity)}
+						/>
+					</div>
+					<div className='options-color'>
+						Background Color
+						<input
+							type='color'
+							value={backgroundColor}
+							onChange={handleBackgroundColorChange}
+						/>
+					</div>
+					{JSON.stringify(selectedEvent)}
+					<div className='options-color'>
+						Event Color
+						<input
+							type='color'
+							value={eventColor}
+							onChange={handleEventColorChange}
+						/>
+					</div>
+				</div>
+				<textarea value={rawSched} onInput={(e) => setRawSched(e.target.value)} />
+				<button onClick={() => setStudentSched(rawSched)}>Generate</button>
+        <button onClick={onButtonClick}>Click me</button>
+			<div
+				className='background'
+				style={{
+					backgroundImage: `url(https://images.unsplash.com/photo-1704911206175-666dc9d9c4cc)`,
+				}}
+        ref={exportRef}
+			>
+				<div className='actual-calendar'>
+					{showTimeLabels && (
+						<div className='time-labels'>
+							{Array.from({ length: 24 }).map((_, index) => {
+								const currentTime = minStartTime.clone().add(index, 'hours');
+								if (currentTime.isBefore(adjustedMaxEndTime)) {
+									return (
+										<div key={index} className='time-label'>
+											{currentTime.format('HH:mm')}
+										</div>
+									);
+								}
+								return null;
+							})}
+						</div>
+					)}
+					<FullCalendar
+						plugins={[timeGridPlugin, interactionPlugin]}
+						headerToolbar={false}
+						allDaySlot={false}
+						dayHeaderContent={(args) => moment(args.date).format('ddd').toLowerCase()}
+						slotMinTime='07:30'
+						slotMaxTime='20:00'
+						slotDuration='00:20:00'
+						events={calendarItems}
+						hiddenDays={[0, 6]}
+						contentHeight={'auto'}
+						editable={true}
+						eventClick={(info) => {
+							const event = calendarItems.find(
+								(item) => item.title == info.event.title,
+							);
+							setSelectedEvent(event);
+						}}
+					/>
+				</div>
 			</div>
-			<div className='options'>
-				<div className='options-download'>
-					<button onClick={handleDownload}>Download as PNG</button>
-				</div>
-				<div className='options-toggle'>
-					<label>Show Time Labels</label>
-					<input
-						type='checkbox'
-						checked={showTimeLabels}
-						onChange={() => setShowTimeLabels(!showTimeLabels)}
-					/>
-				</div>
-				<div className='options-slider'>
-					Inner Padding
-					<input
-						type='range'
-						min='0'
-						max='100'
-						value={innerPadding}
-						onChange={handleSliderChange('inner-padding', setInnerPadding)}
-					/>
-				</div>
-				<div className='options-slider'>
-					Outer Margin
-					<input
-						type='range'
-						min='0'
-						max='100'
-						value={outerMargin}
-						onChange={handleSliderChange('outer-margin', setOuterMargin)}
-					/>
-				</div>
-				<div className='options-slider'>
-					Event Font Size
-					<input
-						type='range'
-						min='0'
-						max='200'
-						value={eventFontSize}
-						onChange={handleSliderChange('event-font-size', setEventFontSize)}
-					/>
-				</div>
-				<div className='options-slider'>
-					Text Alignment
-					<input
-						type='range'
-						min='0'
-						max='2'
-						step='1'
-						value={textAlignment}
-						onChange={handleSliderChange('event-text-alignment', setTextAlignment)}
-					/>
-				</div>
-				<div className='options-slider'>
-          Class Cell Opacity
-					<input
-						type='range'
-						min='50'
-						max='100'
-						value={opacity}
-						onChange={handleSliderChange('event-opacity', setOpacity)}
-					/>
-				</div>
-				<div className='options-color'>
-					Background Color
-					<input
-						type='color'
-						value={backgroundColor}
-						onChange={handleBackgroundColorChange}
-					/>
-				</div>
-				{JSON.stringify(selectedEvent)}
-				<div className='options-color'>
-					Event Color
-					<input type='color' value={eventColor} onChange={handleEventColorChange} />
-				</div>
-			</div>
-			<textarea value={rawSched} onInput={(e) => setRawSched(e.target.value)} />
-			<button onClick={() => setStudentSched(rawSched)}>Generate</button>
 		</>
 	);
 }
