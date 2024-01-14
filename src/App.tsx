@@ -9,20 +9,22 @@ import moment from 'moment';
 import './App.css';
 
 // Import data and utility functions
-import sampleData from './util/sampleData';
 import { parseStudentSchedule } from './util/parseStudentSched';
 import { convertSubjectSetToCalendarItems } from './util/subjectSetToCalendarItem';
-import { parseSubjectEntry } from './util/parseSubjectEntry';
 
 // Import types and schedules
 import SetWithContentEquality, { Subject } from './types/SubjectSet';
 import sectionSchedules from './schedules/schedules';
 import '@fortawesome/fontawesome-free/css/all.css';
 
+// Import components
+import TextAreaModal from './components/TextAreaModal';
+
 function App() {
 	// Data
 	const [rawSched, setRawSched] = useState<string>('');
 	const [studentSched, setStudentSched] = useState<string>('');
+	const [showTextArea, setShowTextArea] = useState(false);
 
 	// Cosmetics
 	const [innerPadding, setInnerPadding] = useState<string>('');
@@ -36,6 +38,11 @@ function App() {
 	const [eventColor, setEventColor] = useState<string>('#F9F8F4');
 	const [selectedEvent, setSelectedEvent] = useState<EventSourceInput>();
 	const [calendarItems, setCalendarItems] = useState<EventSourceInput[]>([]);
+
+	// Options
+	const [toggleState, setToggleState] = useState(0);
+	const [isSmallScreen, setIsSmallScreen] = useState(false);
+	const [showMore, setShowMore] = useState(false);
 
 	useEffect(() => {
 		document.documentElement.style.setProperty(
@@ -71,16 +78,17 @@ function App() {
 		);
 		setCalendarItems(calendarItems);
 	}, [studentSched]);
-
-	const minStartTime = moment.min(
-		calendarItems.map((item) => moment(item.startTime, 'HH:mm:ss')),
-	);
+	console.log('Calendar items: ', calendarItems);
+	const minStartTime = moment('08:00', 'HH:mm');
 
 	const maxEndTime = moment.max(
 		calendarItems.map((item) => moment(item.endTime, 'HH:mm:ss')),
 	);
 
 	const adjustedMaxEndTime = maxEndTime.clone().add(1, 'hours');
+	const toggleTextAreaVisibility = () => {
+		setShowTextArea((prev) => !prev);
+	};
 
 	const handleSliderChange =
 		(
@@ -143,6 +151,13 @@ function App() {
 			targetNode.style.backgroundColor = 'transparent';
 		});
 	};
+
+	const handleSaveTextArea = (inputText: string) => {
+		setRawSched(inputText);
+		setStudentSched(inputText);
+		setShowTextArea(false);
+	};
+
 	const options = [
 		'Time Labels',
 		'Inner Padding',
@@ -255,60 +270,79 @@ function App() {
 			<div className="header">
 				<h1>class schedule</h1>
 			</div>
-			<div className="actual-calendar">
-				{showTimeLabels && (
-					<div className="time-labels">
-						{Array.from({ length: 24 }).map((_, index) => {
-							const currentTime = minStartTime.clone().add(index, 'hours');
-							if (currentTime.isBefore(adjustedMaxEndTime)) {
-								return (
-									<div key={index} className="time-label">
-										{currentTime.format('HH:mm')}
-									</div>
-								);
-							}
-							return null;
-						})}
-					</div>
-				)}
-				<FullCalendar
-					plugins={[timeGridPlugin, interactionPlugin]}
-					headerToolbar={false}
-					allDaySlot={false}
-					dayHeaderContent={(args) => moment(args.date).format('ddd').toLowerCase()}
-					slotMinTime="07:30"
-					slotMaxTime="20:00"
-					slotDuration="00:20:00"
-					events={calendarItems}
-					hiddenDays={[0, 6]}
-					contentHeight={'auto'}
-					editable={true}
-					eventClick={(info) => {
-						const event = calendarItems.find(
-							(item) => item.title == info.event.title,
-						);
-						setSelectedEvent(event);
-					}}
+			<button onClick={toggleTextAreaVisibility}>
+				{showTextArea ? 'Hide Textarea' : 'Show Textarea'}
+			</button>
+			{showTextArea && (
+				<TextAreaModal
+					isOpen={showTextArea}
+					onClose={toggleTextAreaVisibility}
+					onSave={handleSaveTextArea}
 				/>
-			</div>
-			<div className="download-container">
-				<div className="options-download">
-					<div onClick={handleDownload}>
-						<i className="fas fa-download"></i> Download
+			)}
+			{calendarItems && calendarItems.length > 0 && (
+				<>
+					<div className="actual-calendar">
+						{showTimeLabels && (
+							<div className="time-labels">
+								{Array.from({ length: 24 }).map((_, index) => {
+									const currentTime = minStartTime.clone().add(index, 'hours');
+									if (currentTime.isBefore(adjustedMaxEndTime)) {
+										return (
+											<div key={index} className="time-label">
+												{currentTime.format('HH:mm')}
+											</div>
+										);
+									}
+									return null;
+								})}
+							</div>
+						)}
+
+						<FullCalendar
+							plugins={[timeGridPlugin, interactionPlugin]}
+							headerToolbar={false}
+							allDaySlot={false}
+							dayHeaderContent={(args) =>
+								moment(args.date).format('ddd').toLowerCase()
+							}
+							slotMinTime="07:30"
+							slotMaxTime="20:00"
+							slotDuration="00:20:00"
+							events={calendarItems}
+							hiddenDays={[0, 6]}
+							contentHeight={'auto'}
+							editable={true}
+							eventClick={(info) => {
+								const event = calendarItems.find(
+									(item) => item.title == info.event.title,
+								);
+								setSelectedEvent(event);
+							}}
+						/>
 					</div>
-				</div>
-				{JSON.stringify(selectedEvent)}
-				<div className="options-color">
-					Event Color
-					<input type="color" value={eventColor} onChange={handleEventColorChange} />
-				</div>
-			</div>
-			<textarea value={rawSched} onInput={(e) => setRawSched(e.target.value)} />
-			<button onClick={() => setStudentSched(rawSched)}>Generate</button>
-			<div className="options">
-				{isSmallScreen && !showMore ? null : optionsButtons}
-				{fields}
-			</div>
+					<div className="download-container">
+						<div className="options-download">
+							<div onClick={handleDownload}>
+								<i className="fas fa-download"></i> Download
+							</div>
+						</div>
+						{JSON.stringify(selectedEvent)}
+						<div className="options-color">
+							Event Color
+							<input
+								type="color"
+								value={eventColor}
+								onChange={handleEventColorChange}
+							/>
+						</div>
+					</div>
+					<div className="options">
+						{isSmallScreen && !showMore ? null : optionsButtons}
+						{fields}
+					</div>
+				</>
+			)}
 		</>
 	);
 }
