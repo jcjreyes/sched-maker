@@ -1,6 +1,6 @@
 #root {
-	max-width: 1280px;
-	height: 100vh;
+	/* max-width: 1280px; */
+	/* height: 100vh; */
 	margin: auto;
 	padding: 2rem;
 	text-align: center;
@@ -50,6 +50,11 @@
 	margin: auto;
 }
 
+.calendar-container {
+  height: 100vh;
+  width: 100vw;
+}
+
 .fc-day-today {
 	background-color: inherit !important;
 }
@@ -82,10 +87,14 @@ colgroup,
 
 .fc-timegrid-event-harness-inset {
 	margin: var(--outer-margin);
-	/* padding: var(--inner-padding); */
+  opacity: var(--event-opacity);
 }
 
 .fc-event-time,
 .fc-event-title {
 	text-align: var(--event-text-alignment);
+}
+
+.fc-timegrid-event-harness-inset .fc-timegrid-event {
+  box-shadow: none !important;
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -19,14 +19,17 @@ import '@fortawesome/fontawesome-free/css/all.css';
 
 // Import components
 import TextAreaModal from './components/TextAreaModal';
+import { toPng } from 'html-to-image';
 
 function App() {
+	// Data
 	// Data
 	const [rawSched, setRawSched] = useState<string>('');
 	const [studentSched, setStudentSched] = useState<string>('');
 	const [showTextArea, setShowTextArea] = useState(false);
 
 	// Cosmetics
+	const [opacity, setOpacity] = useState<number>(100);
 	const [innerPadding, setInnerPadding] = useState<string>('');
 	const [outerMargin, setOuterMargin] = useState<string>('');
 	const [eventFontSize, setEventFontSize] = useState<string>('');
@@ -43,6 +46,24 @@ function App() {
 	const [toggleState, setToggleState] = useState(0);
 	const [isSmallScreen, setIsSmallScreen] = useState(false);
 	const [showMore, setShowMore] = useState(false);
+	const exportRef = useRef<HTMLDivElement>(null);
+
+	const onButtonClick = useCallback(() => {
+		if (exportRef.current === null) {
+			return;
+		}
+
+		toPng(exportRef.current, { cacheBust: true })
+			.then((dataUrl) => {
+				const link = document.createElement('a');
+				link.download = 'my-image-name.png';
+				link.href = dataUrl;
+				link.click();
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}, [exportRef]);
 
 	useEffect(() => {
 		document.documentElement.style.setProperty(
@@ -104,6 +125,8 @@ function App() {
 
 			if (property == 'event-text-alignment') {
 				root.setProperty(`--${property}`, alignments[parseInt(value)]);
+			} else if (property == 'event-opacity') {
+				root.setProperty(`--${property}`, value * 0.01);
 			} else {
 				root.setProperty(`--${property}`, `${value * 0.01}rem`);
 			}
@@ -264,6 +287,22 @@ function App() {
 			fields.push(fieldMappings[key]);
 		}
 	});
+
+	const [horizontalOffset, setHorizontalOffset] = useState<number>(0);
+	const [verticalOffset, setVerticalOffset] = useState<number>(0);
+	const [zoomLevel, setZoomLevel] = useState<number>(100); // 100% initial zoom
+
+	const handleHorizontalChange = (event) => {
+		setHorizontalOffset(event.target.value);
+	};
+
+	const handleVerticalChange = (event) => {
+		setVerticalOffset(event.target.value);
+	};
+
+	const handleZoomChange = (event) => {
+		setZoomLevel(event.target.value);
+	};
 
 	return (
 		<>

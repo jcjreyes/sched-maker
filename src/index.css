@@ -15,6 +15,7 @@
 	--inner-padding: 0.2rem;
 	--event-font-size: 1.25rem;
 	--event-text-alignment: center;
+  --event-opacity: 1;
 	--calendar-width: 1280px;
 }
 
