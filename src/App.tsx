@@ -38,24 +38,24 @@ function App() {
 	const [eventColor, setEventColor] = useState<string>('#F9F8F4');
 	const [selectedEvent, setSelectedEvent] = useState<EventSourceInput>();
 	const [calendarItems, setCalendarItems] = useState<EventSourceInput[]>([]);
-  const exportRef = useRef<HTMLDivElement>(null)
+	const exportRef = useRef<HTMLDivElement>(null);
 
-  const onButtonClick = useCallback(() => {
-    if (exportRef.current === null) {
-      return
-    }
+	const onButtonClick = useCallback(() => {
+		if (exportRef.current === null) {
+			return;
+		}
 
-    toPng(exportRef.current, { cacheBust: true, })
-      .then((dataUrl) => {
-        const link = document.createElement('a')
-        link.download = 'my-image-name.png'
-        link.href = dataUrl
-        link.click()
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-  }, [exportRef])
+		toPng(exportRef.current, { cacheBust: true })
+			.then((dataUrl) => {
+				const link = document.createElement('a');
+				link.download = 'my-image-name.png';
+				link.href = dataUrl;
+				link.click();
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}, [exportRef]);
 
 	useEffect(() => {
 		document.documentElement.style.setProperty(
@@ -166,102 +166,144 @@ function App() {
 		});
 	};
 
+	const [horizontalOffset, setHorizontalOffset] = useState<number>(0);
+	const [verticalOffset, setVerticalOffset] = useState<number>(0);
+	const [zoomLevel, setZoomLevel] = useState<number>(100); // 100% initial zoom
+
+	const handleHorizontalChange = (event) => {
+		setHorizontalOffset(event.target.value);
+	};
+
+	const handleVerticalChange = (event) => {
+		setVerticalOffset(event.target.value);
+	};
+
+	const handleZoomChange = (event) => {
+		setZoomLevel(event.target.value);
+	};
+
 	return (
 		<>
 			<div className='header'>
 				<h1>class schedule</h1>
 			</div>
-				<div className='options'>
-					<div className='options-download'>
-						<button onClick={handleDownload}>Download as PNG</button>
-					</div>
-					<div className='options-toggle'>
-						<label>Show Time Labels</label>
-						<input
-							type='checkbox'
-							checked={showTimeLabels}
-							onChange={() => setShowTimeLabels(!showTimeLabels)}
-						/>
-					</div>
-					<div className='options-slider'>
-						Inner Padding
-						<input
-							type='range'
-							min='0'
-							max='100'
-							value={innerPadding}
-							onChange={handleSliderChange('inner-padding', setInnerPadding)}
-						/>
-					</div>
-					<div className='options-slider'>
-						Outer Margin
-						<input
-							type='range'
-							min='0'
-							max='100'
-							value={outerMargin}
-							onChange={handleSliderChange('outer-margin', setOuterMargin)}
-						/>
-					</div>
-					<div className='options-slider'>
-						Event Font Size
-						<input
-							type='range'
-							min='0'
-							max='200'
-							value={eventFontSize}
-							onChange={handleSliderChange('event-font-size', setEventFontSize)}
-						/>
-					</div>
-					<div className='options-slider'>
-						Text Alignment
-						<input
-							type='range'
-							min='0'
-							max='2'
-							step='1'
-							value={textAlignment}
-							onChange={handleSliderChange('event-text-alignment', setTextAlignment)}
-						/>
-					</div>
-					<div className='options-slider'>
-						Class Cell Opacity
-						<input
-							type='range'
-							min='50'
-							max='100'
-							value={opacity}
-							onChange={handleSliderChange('event-opacity', setOpacity)}
-						/>
-					</div>
-					<div className='options-color'>
-						Background Color
-						<input
-							type='color'
-							value={backgroundColor}
-							onChange={handleBackgroundColorChange}
-						/>
-					</div>
-					{JSON.stringify(selectedEvent)}
-					<div className='options-color'>
-						Event Color
-						<input
-							type='color'
-							value={eventColor}
-							onChange={handleEventColorChange}
-						/>
-					</div>
+			<div className='options'>
+				<div className='options-download'>
+					<button onClick={handleDownload}>Download as PNG</button>
 				</div>
-				<textarea value={rawSched} onInput={(e) => setRawSched(e.target.value)} />
-				<button onClick={() => setStudentSched(rawSched)}>Generate</button>
-        <button onClick={onButtonClick}>Click me</button>
+				<div className='options-toggle'>
+					<label>Show Time Labels</label>
+					<input
+						type='checkbox'
+						checked={showTimeLabels}
+						onChange={() => setShowTimeLabels(!showTimeLabels)}
+					/>
+				</div>
+				<div className='options-slider'>
+					Inner Padding
+					<input
+						type='range'
+						min='0'
+						max='100'
+						value={innerPadding}
+						onChange={handleSliderChange('inner-padding', setInnerPadding)}
+					/>
+				</div>
+				<div className='options-slider'>
+					Outer Margin
+					<input
+						type='range'
+						min='0'
+						max='100'
+						value={outerMargin}
+						onChange={handleSliderChange('outer-margin', setOuterMargin)}
+					/>
+				</div>
+				<div className='options-slider'>
+					Event Font Size
+					<input
+						type='range'
+						min='0'
+						max='200'
+						value={eventFontSize}
+						onChange={handleSliderChange('event-font-size', setEventFontSize)}
+					/>
+				</div>
+				<div className='options-slider'>
+					Text Alignment
+					<input
+						type='range'
+						min='0'
+						max='2'
+						step='1'
+						value={textAlignment}
+						onChange={handleSliderChange('event-text-alignment', setTextAlignment)}
+					/>
+				</div>
+				<div className='options-slider'>
+					Class Cell Opacity
+					<input
+						type='range'
+						min='50'
+						max='100'
+						value={opacity}
+						onChange={handleSliderChange('event-opacity', setOpacity)}
+					/>
+				</div>
+				<div className='options-color'>
+					Background Color
+					<input
+						type='color'
+						value={backgroundColor}
+						onChange={handleBackgroundColorChange}
+					/>
+				</div>
+				{JSON.stringify(selectedEvent)}
+				<div className='options-color'>
+					Event Color
+					<input type='color' value={eventColor} onChange={handleEventColorChange} />
+				</div>
+				<div>
+					<label>Horizontal Offset:</label>
+					<input
+						type='range'
+						min='0'
+						max='100'
+						value={horizontalOffset}
+						onChange={handleHorizontalChange}
+					/>
+					<br />
+					<label>Vertical Offset:</label>
+					<input
+						type='range'
+						min='0'
+						max='100'
+						value={verticalOffset}
+						onChange={handleVerticalChange}
+					/>
+					<label>Zoom:</label>
+					<input
+						type='range'
+						min='50' // set your desired min zoom level
+						max='500' // set your desired max zoom level
+						value={zoomLevel}
+						onChange={handleZoomChange}
+					/>
+				</div>
+			</div>
+			<textarea value={rawSched} onInput={(e) => setRawSched(e.target.value)} />
+			<button onClick={() => setStudentSched(rawSched)}>Generate</button>
+			<button onClick={onButtonClick}>Click me</button>
 			<div
 				className='background'
 				style={{
 					backgroundImage: `url(https://images.unsplash.com/photo-1704911206175-666dc9d9c4cc)`,
+					backgroundPosition: `${horizontalOffset}% ${verticalOffset}%`,
+					backgroundSize: `${zoomLevel}%`,
+					backgroundRepeat: 'no-repeat',
 				}}
-        ref={exportRef}
-        className='container'
+				ref={exportRef}
+				className='container'
 			>
 				<div className='actual-calendar'>
 					{showTimeLabels && (
