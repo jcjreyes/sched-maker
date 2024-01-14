@@ -82,7 +82,7 @@ colgroup,
 
 .fc-timegrid-event-harness-inset {
 	margin: var(--outer-margin);
-	/* padding: var(--inner-padding); */
+  opacity: var(--event-opacity);
 }
 
 .fc-event-time,

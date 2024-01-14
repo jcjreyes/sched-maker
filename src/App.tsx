@@ -25,6 +25,7 @@ function App() {
 	const [studentSched, setStudentSched] = useState<string>('');
 
   // Cosmetics
+  const [opacity, setOpacity] = useState<number>(100);
 	const [innerPadding, setInnerPadding] = useState<string>('');
 	const [outerMargin, setOuterMargin] = useState<string>('');
 	const [eventFontSize, setEventFontSize] = useState<string>('');
@@ -96,7 +97,9 @@ function App() {
 
 			if (property == 'event-text-alignment') {
 				root.setProperty(`--${property}`, alignments[parseInt(value)]);
-			} else {
+			} else if (property == 'event-opacity') {
+        root.setProperty(`--${property}`, value * 0.01)
+      } else {
 				root.setProperty(`--${property}`, `${value * 0.01}rem`);
 			}
 		};
@@ -236,6 +239,16 @@ function App() {
 						step='1'
 						value={textAlignment}
 						onChange={handleSliderChange('event-text-alignment', setTextAlignment)}
+					/>
+				</div>
+				<div className='options-slider'>
+          Class Cell Opacity
+					<input
+						type='range'
+						min='50'
+						max='100'
+						value={opacity}
+						onChange={handleSliderChange('event-opacity', setOpacity)}
 					/>
 				</div>
 				<div className='options-color'>
